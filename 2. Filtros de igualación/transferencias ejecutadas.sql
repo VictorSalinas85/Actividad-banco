@@ -1,0 +1,1 @@
+select id_transferencia, tipo_transferencia, cuenta_origen, monto_total, estado_transferencia from transferencia where estado_transferencia = 'Ejecutada';

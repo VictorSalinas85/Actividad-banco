@@ -1,0 +1,1 @@
+select numero_identificacion, razon_social, correo_electronico, numero_de_telefono from clientes where tipo_cliente = 'E';

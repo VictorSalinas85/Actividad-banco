@@ -1,0 +1,1 @@
+select numero_identificacion, tipo_cliente, nombre_completo, razon_social from clientes where numero_identificacion in (select id_titular from cuenta_bancaria);

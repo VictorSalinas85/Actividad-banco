@@ -1,0 +1,1 @@
+select numero_cuenta, id_titular, saldo_actual from cuenta_bancaria where id_titular in (select id_cliente_solicitante from prestamo where estado_prestamo = 'Aprobado');

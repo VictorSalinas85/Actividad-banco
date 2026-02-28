@@ -1,0 +1,1 @@
+select clientes.numero_identificacion, clientes.nombre_completo, clientes.razon_social, prestamo.id_prestamo, prestamo.estado_prestamo from clientes left join prestamo on clientes.numero_identificacion = prestamo.id_cliente_solicitante;

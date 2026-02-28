@@ -1,0 +1,1 @@
+select id_transferencia, tipo_transferencia, cuenta_origen, monto_total, estado_transferencia from transferencia where id_usuario_creador in (select id_usuario from usuarios_del_sistema where numero_identificacion_cliente in (select numero_identificacion from clientes where tipo_cliente = 'E'));

@@ -1,0 +1,1 @@
+select clientes.numero_identificacion, clientes.nombre_completo, clientes.razon_social, cuenta_bancaria.numero_cuenta, cuenta_bancaria.saldo_actual from clientes join cuenta_bancaria on clientes.numero_identificacion = cuenta_bancaria.id_titular;

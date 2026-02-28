@@ -1,0 +1,1 @@
+select transferencia.id_transferencia, transferencia.estado_transferencia, transferencia.monto_total, usuarios_del_sistema.nombre_completo as aprobador from transferencia left join usuarios_del_sistema on transferencia.id_usuario_aprobador = usuarios_del_sistema.id_usuario;

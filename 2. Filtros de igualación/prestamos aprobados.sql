@@ -1,0 +1,1 @@
+select id_prestamo, id_cliente_solicitante, monto_solicitado, monto_aprobado, estado_prestamo from prestamo where estado_prestamo = 'Aprobado';

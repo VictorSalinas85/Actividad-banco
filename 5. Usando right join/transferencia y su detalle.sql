@@ -1,0 +1,1 @@
+select transferencia.id_transferencia, transferencia.estado_transferencia, transferencia_detalle.monto, transferencia_detalle.concepto from transferencia right join transferencia_detalle on transferencia.id_transferencia = transferencia_detalle.id_transferencia;

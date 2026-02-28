@@ -1,0 +1,1 @@
+select clientes.numero_identificacion, cuenta_bancaria.numero_cuenta from clientes right join cuenta_bancaria on clientes.numero_identificacion = cuenta_bancaria.id_titular;
