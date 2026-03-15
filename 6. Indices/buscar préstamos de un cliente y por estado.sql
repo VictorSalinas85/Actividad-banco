@@ -1,0 +1,1 @@
+create index if not exists prestamo_cliente_estado on prestamo(id_cliente_solicitante, estado_prestamo);

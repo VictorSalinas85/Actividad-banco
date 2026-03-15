@@ -1,0 +1,1 @@
+create index if not exists idx_transferencia_origen_fecha on transferencia(cuenta_origen, fecha_creacion);

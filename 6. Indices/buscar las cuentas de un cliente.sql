@@ -1,0 +1,1 @@
+create index if not exists cuenta_banc_id_titul on cuenta_bancaria(id_titular);
