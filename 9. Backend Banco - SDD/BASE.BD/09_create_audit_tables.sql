@@ -1,0 +1,41 @@
+-- 09_create_audit_tables.sql
+USE banco_core;
+
+CREATE TABLE IF NOT EXISTS aud_bitacora_evento (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  tipo_operacion_id BIGINT UNSIGNED NOT NULL,
+  fecha_hora_operacion DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  id_usuario BIGINT UNSIGNED NOT NULL,
+  rol_usuario_id BIGINT UNSIGNED NULL,
+  producto_tipo VARCHAR(40) NOT NULL,
+  producto_id VARCHAR(64) NOT NULL,
+  datos_detalle JSON NOT NULL,
+  hash_integridad CHAR(64) NULL,
+  created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  CONSTRAINT chk_aud_producto_tipo CHECK (producto_tipo IN ('CUENTA','PRESTAMO','TRANSFERENCIA','USUARIO','CLIENTE'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS aud_cambio_dato (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  tabla VARCHAR(120) NOT NULL,
+  registro_id VARCHAR(64) NOT NULL,
+  accion VARCHAR(20) NOT NULL,
+  old_data JSON NULL,
+  new_data JSON NULL,
+  sql_user VARCHAR(120) NOT NULL,
+  host_name VARCHAR(255) NULL,
+  trx_ref VARCHAR(120) NULL,
+  changed_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  CONSTRAINT chk_aud_cambio_accion CHECK (accion IN ('INSERT','UPDATE','DELETE'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS aud_error_operacion (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  codigo_error VARCHAR(32) NOT NULL,
+  modulo VARCHAR(20) NOT NULL,
+  mensaje VARCHAR(255) NOT NULL,
+  referencia VARCHAR(64) NULL,
+  actor_usuario_id BIGINT UNSIGNED NULL,
+  payload JSON NULL,
+  created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
