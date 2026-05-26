@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(Get-ChildItem \"d:\\\\Universidad\\\\Semestre 4\\\\Bases de datos 2\\\\Actividad-banco\\\\9. Backend Banco - SDD\\\\Banco\\\\src\\\\main\\\\java\\\\bd2\\\\Banco\\\\domain\\\\entities\")",
+      "Bash(Select-Object -ExpandProperty Name)",
+      "Bash(echo \"Exit: $?\")",
+      "Bash(Get-ChildItem -Recurse -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(xargs grep -l \"@RestController\\\\|@Controller\\\\|@RequestMapping\")",
+      "Bash(DB_USERNAME=root DB_PASSWORD=\"Victsalinas85*\" DB_HOST=localhost DB_PORT=3306 DB_NAME=banco_bd ./mvnw spring-boot:run --no-transfer-progress)"
+    ]
+  }
+}
