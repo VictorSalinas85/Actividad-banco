@@ -9,6 +9,7 @@ import bd2.Banco.domain.entities.CtaCuenta;
 import bd2.Banco.domain.entities.SecUsuario;
 import bd2.Banco.domain.entities.TrfTransferencia;
 import bd2.Banco.domain.exceptions.EntidadNoEncontradaException;
+import bd2.Banco.domain.exceptions.TransferenciaInvalidaException;
 import bd2.Banco.domain.repositories.CatCanalOperacionRepository;
 import bd2.Banco.domain.repositories.CatEstadoTransferenciaRepository;
 import bd2.Banco.domain.repositories.CtaCuentaRepository;
@@ -33,6 +34,9 @@ public class TrfTransferenciaCrudService {
 
     @Transactional
     public TrfTransferenciaResponse crear(TrfTransferenciaCreateRequest request) {
+        if (request.getCuentaOrigenId().equals(request.getCuentaDestinoId())) {
+            throw new TransferenciaInvalidaException("La cuenta de origen y destino no pueden ser la misma: " + request.getCuentaOrigenId());
+        }
         CtaCuenta cuentaOrigen = ctaCuentaRepository.findById(request.getCuentaOrigenId())
                 .orElseThrow(() -> new EntidadNoEncontradaException("CtaCuenta", request.getCuentaOrigenId()));
         CtaCuenta cuentaDestino = ctaCuentaRepository.findById(request.getCuentaDestinoId())

@@ -8,6 +8,8 @@ import bd2.Banco.domain.entities.CrePrestamo;
 import bd2.Banco.domain.entities.CrePrestamoAprobacion;
 import bd2.Banco.domain.entities.SecUsuario;
 import bd2.Banco.domain.exceptions.EntidadNoEncontradaException;
+import bd2.Banco.domain.exceptions.OperacionCrudNoPermitidaException;
+import bd2.Banco.domain.exceptions.RegistroDuplicadoException;
 import bd2.Banco.domain.repositories.CatMotivoRechazoRepository;
 import bd2.Banco.domain.repositories.CrePrestamoAprobacionRepository;
 import bd2.Banco.domain.repositories.CrePrestamoRepository;
@@ -30,8 +32,14 @@ public class CrePrestamoAprobacionCrudService {
 
     @Transactional
     public CrePrestamoAprobacionResponse crear(CrePrestamoAprobacionCreateRequest request) {
+        if (request.getDecision() == DecisionAprobacionPrestamo.RECHAZADO && request.getMotivoRechazoId() == null) {
+            throw new OperacionCrudNoPermitidaException("CrePrestamoAprobacion", "rechazar sin motivo_rechazo_id");
+        }
         CrePrestamo prestamo = crePrestamoRepository.findById(request.getPrestamoId())
                 .orElseThrow(() -> new EntidadNoEncontradaException("CrePrestamo", request.getPrestamoId()));
+        if (repository.existsByPrestamoId(request.getPrestamoId())) {
+            throw new RegistroDuplicadoException("aprobacion prestamoId", String.valueOf(request.getPrestamoId()));
+        }
         SecUsuario analista = secUsuarioRepository.findById(request.getAnalistaUsuarioId())
                 .orElseThrow(() -> new EntidadNoEncontradaException("SecUsuario", request.getAnalistaUsuarioId()));
         CatMotivoRechazo motivoRechazo = null;

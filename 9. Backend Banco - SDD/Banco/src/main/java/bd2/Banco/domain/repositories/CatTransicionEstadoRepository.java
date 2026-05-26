@@ -14,4 +14,6 @@ public interface CatTransicionEstadoRepository extends JpaRepository<CatTransici
     Optional<CatTransicionEstado> findByEntidadAndEstadoOrigenIdAndEstadoDestinoId(
             EntidadTransicion entidad, Long estadoOrigenId, Long estadoDestinoId);
     List<CatTransicionEstado> findByEntidadAndEstadoOrigenId(EntidadTransicion entidad, Long estadoOrigenId);
+    boolean existsByEntidadAndEstadoOrigenCodigoAndEstadoDestinoCodigo(
+            EntidadTransicion entidad, String estadoOrigenCodigo, String estadoDestinoCodigo);
 }

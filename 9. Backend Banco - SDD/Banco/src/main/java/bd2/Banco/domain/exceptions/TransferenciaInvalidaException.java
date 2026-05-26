@@ -6,4 +6,8 @@ public class TransferenciaInvalidaException extends DomainException {
     public TransferenciaInvalidaException(Long transferenciaId) {
         super("DOM-TRF-003", "La transferencia no puede procesarse en su estado actual, id: " + transferenciaId);
     }
+
+    public TransferenciaInvalidaException(String razon) {
+        super("DOM-TRF-003", razon);
+    }
 }

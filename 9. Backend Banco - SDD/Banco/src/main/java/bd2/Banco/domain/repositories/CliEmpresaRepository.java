@@ -8,7 +8,7 @@ import java.util.Optional;
 
 @Repository
 public interface CliEmpresaRepository extends JpaRepository<CliEmpresa, Long> {
-    Optional<CliEmpresa> findByRuc(String ruc);
+    Optional<CliEmpresa> findByNit(String nit);
     Optional<CliEmpresa> findBySecUsuarioId(Long usuarioId);
-    boolean existsByRuc(String ruc);
+    boolean existsByNit(String nit);
 }

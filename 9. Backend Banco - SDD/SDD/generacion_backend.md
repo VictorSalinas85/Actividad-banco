@@ -20,7 +20,10 @@
 9. [Excepciones CRUD](#9-excepciones-crud)
 10. [DTOs CRUD](#10-dtos-crud)
 11. [Servicios CRUD](#11-servicios-crud)
-12. [Historial de commits](#12-historial-de-commits)
+12. [Corrección de bugs en servicios CRUD y repositorios](#12-corrección-de-bugs-en-servicios-crud-y-repositorios)
+13. [Matriz de roles vs operaciones](#13-matriz-de-roles-vs-operaciones)
+14. [Capa de aplicación — Use Cases por rol](#14-capa-de-aplicación--use-cases-por-rol)
+15. [Historial de commits](#15-historial-de-commits)
 
 ---
 
@@ -608,7 +611,298 @@ Esto garantiza que las tablas de auditoría sean **append-only** incluso si algu
 
 ---
 
-## 12. Historial de commits
+## 12. Corrección de bugs en servicios CRUD y repositorios
+
+**Fecha:** Mayo 2026  
+**Archivos afectados:** 9 archivos modificados (5 servicios, 3 repositorios, 1 excepción)
+
+Antes de crear la capa de aplicación se realizó una auditoría completa de los servicios CRUD existentes. Se identificaron y corrigieron los siguientes problemas:
+
+### 12.1 Inconsistencia de nombres — `CliEmpresaRepository` y `CliEmpresaCrudService`
+
+**Problema:** El repositorio exponía `findByRuc()` y `existsByRuc()`, pero la entidad `CliEmpresa` tiene el campo llamado `nit` (columna `nit`). Spring Data JPA busca propiedades por nombre de campo en la entidad, por lo que `findByRuc` hubiera lanzado `PropertyReferenceException` en runtime.
+
+**Corrección:**
+
+| Archivo | Cambio |
+|---------|--------|
+| `CliEmpresaRepository.java` | `findByRuc` → `findByNit`; `existsByRuc` → `existsByNit` |
+| `CliEmpresaCrudService.java` | `repository.findByRuc(...)` → `repository.findByNit(...)` |
+
+### 12.2 Validaciones de duplicados faltantes en relaciones N:M
+
+Tres servicios de relación permitían crear registros duplicados (mismo par de IDs) porque nunca verificaban si la combinación ya existía. Los repositorios ya tenían los métodos `existsBy...` necesarios pero nunca se invocaban.
+
+| Servicio corregido | Método de validación usado | Excepción lanzada |
+|--------------------|---------------------------|-------------------|
+| `SecUsuarioRolCrudService` | `existsByUsuarioIdAndRolId` | `RegistroDuplicadoException("usuario-rol", ...)` |
+| `CliEmpresaUsuarioCrudService` | `existsByEmpresaIdAndUsuarioId` | `RegistroDuplicadoException("empresa-usuario", ...)` |
+| `CliEmpresaUsuarioRolCrudService` | `existsByEmpresaUsuarioIdAndRolEmpresaId` | `RegistroDuplicadoException("empresaUsuario-rolEmpresa", ...)` |
+
+### 12.3 Validación de duplicados compuestos — `CatTransicionEstado`
+
+**Problema:** `CatTransicionEstadoCrudService.crear()` no verificaba si ya existía una transición con la misma combinación `(entidad, estadoOrigenCodigo, estadoDestinoCodigo)`, permitiendo crear reglas de transición duplicadas.
+
+**Corrección:**
+- Se añadió método al repositorio: `existsByEntidadAndEstadoOrigenCodigoAndEstadoDestinoCodigo`
+- Se añadió la validación en `crear()` con `RegistroDuplicadoException`
+
+### 12.4 Validaciones de lógica de negocio — Aprobación de préstamos
+
+**Problema:** `CrePrestamoAprobacionCrudService.crear()` tenía dos problemas:
+1. No validaba que si `decision = RECHAZADO`, el campo `motivoRechazoId` fuera obligatorio
+2. No verificaba si ya existía una aprobación previa para el mismo préstamo
+
+**Corrección:**
+- Se añadió `existsByPrestamoId` al repositorio `CrePrestamoAprobacionRepository`
+- Se agregó validación temprana: si `decision == RECHAZADO && motivoRechazoId == null` → `OperacionCrudNoPermitidaException`
+- Se agregó verificación de duplicado antes de crear
+
+### 12.5 Validación lógica — Cuenta origen igual a cuenta destino en transferencias
+
+**Problema:** `TrfTransferenciaCrudService.crear()` no verificaba que `cuentaOrigenId != cuentaDestinoId`, permitiendo registrar una transferencia de una cuenta a sí misma.
+
+**Corrección:**
+- Se añadió constructor a `TransferenciaInvalidaException(String razon)` para admitir mensajes personalizados
+- Se añadió validación al inicio de `crear()`:
+```java
+if (request.getCuentaOrigenId().equals(request.getCuentaDestinoId())) {
+    throw new TransferenciaInvalidaException(
+        "La cuenta de origen y destino no pueden ser la misma: " + request.getCuentaOrigenId());
+}
+```
+
+### 12.6 Resumen de archivos modificados
+
+| Archivo | Tipo de cambio |
+|---------|---------------|
+| `CliEmpresaRepository.java` | Renombrado findByRuc → findByNit |
+| `CliEmpresaCrudService.java` | Usa findByNit |
+| `SecUsuarioRolCrudService.java` | Validación duplicado + import |
+| `CliEmpresaUsuarioCrudService.java` | Validación duplicado + import |
+| `CliEmpresaUsuarioRolCrudService.java` | Validación duplicado + import |
+| `CatTransicionEstadoRepository.java` | Nuevo método existsByEntidad+Codigos |
+| `CatTransicionEstadoCrudService.java` | Validación duplicado compuesto + import |
+| `CrePrestamoAprobacionRepository.java` | Nuevo método existsByPrestamoId |
+| `CrePrestamoAprobacionCrudService.java` | Validación decision+motivo y duplicado + imports |
+| `TransferenciaInvalidaException.java` | Nuevo constructor con razón libre |
+| `TrfTransferenciaCrudService.java` | Validación cuenta origen != destino + import |
+
+---
+
+## 13. Matriz de roles vs operaciones
+
+**Fecha:** Mayo 2026
+
+Antes de crear la capa de aplicación se definió formalmente la matriz completa de qué puede hacer cada rol del sistema.
+
+### 13.1 Roles del sistema
+
+| Rol | Contexto | Descripción |
+|-----|----------|-------------|
+| `CLIENTE_PERSONA` | Portal personal | Persona natural con cuentas propias |
+| `CLIENTE_EMPRESA_ADMIN` | Portal empresa | Administra usuarios y roles de su empresa |
+| `EMPLEADO_VENTANILLA` | Backoffice operativo | Crea clientes, abre cuentas, consigna, retira |
+| `EMPLEADO_COMERCIAL` | Backoffice comercial | Crea empresas, abre cuentas empresariales, gestiona préstamos |
+| `EMPLEADO_EMPRESA_OPERATIVO` | Portal empresa | Operativo de empresa que crea transferencias |
+| `SUPERVISOR_EMPRESA` | Portal empresa | Aprueba o rechaza transferencias de empresa |
+| `ANALISTA_INTERNO` | Backoffice analítico | Aprueba préstamos, bloquea cuentas, accede a auditoría |
+
+### 13.2 Matriz de permisos
+
+| Operación | CLI_PER | CLI_EMP_ADM | EMP_VEN | EMP_COM | EMP_EMP_OP | SUPERV_EMP | ANALISTA |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **CLIENTES** |
+| Crear persona | | | ✅ | | | | |
+| Crear empresa | | | | ✅ | | | |
+| Cambiar estado cliente | | | | | | | ✅ |
+| Ver perfil propio | ✅ | ✅ | | | ✅ | ✅ | |
+| Ver cualquier cliente | | | ✅ | ✅ | | | ✅ |
+| Asociar usuario a empresa | | ✅ | | ✅ | | | |
+| Asignar rol en empresa | | ✅ | | | | | |
+| **CUENTAS** |
+| Abrir cuenta | | | ✅ | ✅ | | | |
+| Consignar | | | ✅ | | | | |
+| Retirar | | | ✅ | | | | |
+| Bloquear cuenta | | | | | | | ✅ |
+| Cancelar cuenta | | | | | | | ✅ |
+| Ver mis cuentas | ✅ | ✅ | | | ✅ | ✅ | |
+| Ver cualquier cuenta | | | ✅ | ✅ | | | ✅ |
+| **PRÉSTAMOS** |
+| Solicitar préstamo | ✅ | ✅ | ✅ | ✅ | | | |
+| Aprobar préstamo | | | | | | | ✅ |
+| Rechazar préstamo | | | | | | | ✅ |
+| Desembolsar préstamo | | | | | | | ✅ |
+| Ver mis préstamos | ✅ | ✅ | | | | | |
+| Ver todos los préstamos | | | | | | | ✅ |
+| **TRANSFERENCIAS** |
+| Crear transferencia | ✅ | | | | ✅ | | |
+| Ejecutar transferencia directa | | | ✅ | | | | |
+| Aprobar transferencia | | | | | | ✅ | |
+| Rechazar transferencia | | | | | | ✅ | |
+| Ver mis transferencias | ✅ | ✅ | | | ✅ | ✅ | |
+| Ver pendientes empresa | | ✅ | | | ✅ | ✅ | |
+| Ver todas las transferencias | | | | | | | ✅ |
+| Vencer pendientes (batch) | | | | | | | ✅ |
+| **AUDITORÍA** |
+| Ver bitácora eventos | | | | | | | ✅ |
+| Ver cambios de datos | | | | | | | ✅ |
+| Ver errores de operación | | | | | | | ✅ |
+| Registrar evento | | | | | | | ✅ |
+
+---
+
+## 14. Capa de aplicación — Use Cases por rol
+
+**Fecha:** Mayo 2026  
+**Ubicación:** `Banco/src/main/java/bd2/Banco/application/usecase/`  
+**Total:** 7 clases
+
+### 14.1 Arquitectura de la capa
+
+Se introdujo un nuevo paquete `application/usecase/` entre los servicios de dominio y los futuros controllers REST. Esta capa:
+
+- Orquesta llamadas a múltiples `CrudService` y `ProcedureService` del dominio
+- Agrupa exactamente las operaciones permitidas para cada rol (según la Matriz §13)
+- Es el único punto de entrada que los controllers conocerán — cada controller inyecta un único Use Case
+- No tiene `@Transactional` propio: delega la atomicidad a los servicios de dominio subyacentes
+
+```
+HTTP Request
+    ↓
+@RestController  (inyecta 1 UseCase)
+    ↓
+XxxUseCase       (orquesta N servicios)
+    ↓
+CrudService / SpService   (capa de dominio)
+    ↓
+Repository / ProcedureCallHelper
+    ↓
+Base de datos
+```
+
+### 14.2 Use Cases creados
+
+#### `ClientePersonaUseCase` — Rol CLIENTE_PERSONA
+
+**Servicios inyectados:** `CliPersonaNaturalCrudService`, `CtaCuentaCrudService`, `CtaMovimientoCrudService`, `CrePrestamoCrudService`, `TrfTransferenciaCrudService`, `SpCreSolicitarPrestamoService`, `SpTrfCrearTransferenciaService`
+
+| Método | Descripción |
+|--------|-------------|
+| `verPerfil(personaId)` | Perfil propio de la persona |
+| `listarMisCuentas(personaId)` | Cuentas cuyo `titularPersonaId` coincide |
+| `verCuenta(cuentaId)` | Detalle de una cuenta |
+| `listarMovimientosCuenta(cuentaId)` | Movimientos de una cuenta específica |
+| `solicitarPrestamo(request)` | Invoca SP `sp_cre_solicitar_prestamo` |
+| `listarMisPrestamos(personaId)` | Préstamos propios filtrados por `clientePersonaId` |
+| `verPrestamo(prestamoId)` | Detalle de un préstamo |
+| `crearTransferencia(request)` | Invoca SP `sp_trf_crear_transferencia` |
+| `listarMisTransferencias(usuarioId)` | Transferencias cuyo `creadorUsuarioId` coincide |
+| `verTransferencia(transferenciaId)` | Detalle de una transferencia |
+
+#### `ClienteEmpresaAdminUseCase` — Rol CLIENTE_EMPRESA_ADMIN
+
+**Servicios inyectados:** `CliEmpresaCrudService`, `CliEmpresaUsuarioCrudService`, `CliEmpresaUsuarioRolCrudService`, `CtaCuentaCrudService`, `CtaMovimientoCrudService`, `CrePrestamoCrudService`, `TrfTransferenciaCrudService`, `SpCliAsociarUsuarioEmpresaService`, `SpCliAsignarRolEmpresaUsuarioService`, `SpCreSolicitarPrestamoService`, `SpTrfConsultarPendientesEmpresaService`
+
+| Método | Descripción |
+|--------|-------------|
+| `verEmpresa(empresaId)` | Perfil de la empresa |
+| `listarUsuariosEmpresa(empresaId)` | Usuarios vinculados a la empresa |
+| `listarRolesUsuarioEmpresa(empresaUsuarioId)` | Roles de un usuario en la empresa |
+| `asociarUsuario(request)` | SP `sp_cli_asociar_usuario_empresa` |
+| `asignarRol(request)` | SP `sp_cli_asignar_rol_empresa_usuario` |
+| `listarCuentasEmpresa(empresaId)` | Cuentas con `titularEmpresaId` coincidente |
+| `listarMovimientosCuenta(cuentaId)` | Movimientos de cuenta |
+| `solicitarPrestamo(request)` | SP `sp_cre_solicitar_prestamo` |
+| `listarPrestamosEmpresa(empresaId)` | Préstamos con `clienteEmpresaId` coincidente |
+| `consultarTransferenciasPendientes(request)` | SP `sp_trf_consultar_pendientes_aprobacion_empresa` |
+| `listarTransferenciasEmpresa(empresaId)` | Transferencias con `empresaId` coincidente |
+
+#### `EmpleadoVentanillaUseCase` — Rol EMPLEADO_VENTANILLA
+
+**Servicios inyectados:** `CliPersonaNaturalCrudService`, `CliEmpresaCrudService`, `CtaCuentaCrudService`, `CtaMovimientoCrudService`, `SpCliCrearPersonaService`, `SpCtaAbrirCuentaService`, `SpCtaConsignarService`, `SpCtaRetirarService`, `SpTrfEjecutarTransferenciaDirectaService`
+
+| Método | Descripción |
+|--------|-------------|
+| `crearPersona(request)` | SP `sp_cli_crear_persona_natural` |
+| `buscarPersona(personaId)` | Consulta persona por ID |
+| `listarPersonas()` | Lista todos los clientes persona |
+| `buscarEmpresa(empresaId)` | Consulta empresa por ID |
+| `abrirCuenta(request)` | SP `sp_cta_abrir_cuenta` |
+| `consignar(request)` | SP `sp_cta_consignar` |
+| `retirar(request)` | SP `sp_cta_retirar` |
+| `verCuenta(cuentaId)` | Detalle de cuenta |
+| `listarCuentas()` | Lista todas las cuentas |
+| `listarMovimientosCuenta(cuentaId)` | Movimientos de una cuenta |
+| `ejecutarTransferenciaDirecta(request)` | SP `sp_trf_ejecutar_transferencia_directa` |
+
+#### `EmpleadoComercialUseCase` — Rol EMPLEADO_COMERCIAL
+
+**Servicios inyectados:** `CliPersonaNaturalCrudService`, `CliEmpresaCrudService`, `CtaCuentaCrudService`, `CrePrestamoCrudService`, `SpCliCrearEmpresaService`, `SpCtaAbrirCuentaService`, `SpCreSolicitarPrestamoService`, `SpCliAsociarUsuarioEmpresaService`
+
+| Método | Descripción |
+|--------|-------------|
+| `crearEmpresa(request)` | SP `sp_cli_crear_empresa` |
+| `buscarPersona(personaId)` / `listarPersonas()` | Consultar clientes persona |
+| `buscarEmpresa(empresaId)` / `listarEmpresas()` | Consultar empresas |
+| `asociarUsuarioAEmpresa(request)` | SP `sp_cli_asociar_usuario_empresa` |
+| `abrirCuenta(request)` | SP `sp_cta_abrir_cuenta` |
+| `verCuenta(cuentaId)` / `listarCuentas()` | Consultar cuentas |
+| `solicitarPrestamo(request)` | SP `sp_cre_solicitar_prestamo` |
+| `verPrestamo(prestamoId)` / `listarPrestamos()` | Consultar préstamos |
+
+#### `EmpleadoEmpresaOperativoUseCase` — Rol EMPLEADO_EMPRESA_OPERATIVO
+
+**Servicios inyectados:** `CtaCuentaCrudService`, `CtaMovimientoCrudService`, `TrfTransferenciaCrudService`, `SpTrfCrearTransferenciaService`, `SpTrfConsultarPendientesEmpresaService`
+
+| Método | Descripción |
+|--------|-------------|
+| `verCuenta(cuentaId)` | Detalle de cuenta empresa |
+| `listarMovimientosCuenta(cuentaId)` | Movimientos de cuenta |
+| `crearTransferencia(request)` | SP `sp_trf_crear_transferencia` |
+| `consultarTransferenciasPendientes(request)` | SP `sp_trf_consultar_pendientes_aprobacion_empresa` |
+| `verTransferencia(transferenciaId)` | Detalle de transferencia |
+| `listarTransferenciasEmpresa(empresaId)` | Transferencias filtradas por empresa |
+
+#### `SupervisorEmpresaUseCase` — Rol SUPERVISOR_EMPRESA
+
+**Servicios inyectados:** `CtaCuentaCrudService`, `CtaMovimientoCrudService`, `TrfTransferenciaCrudService`, `TrfTransferenciaAprobacionCrudService`, `SpTrfAprobarTransferenciaService`, `SpTrfRechazarTransferenciaService`, `SpTrfConsultarPendientesEmpresaService`
+
+| Método | Descripción |
+|--------|-------------|
+| `verCuenta(cuentaId)` | Detalle de cuenta |
+| `listarMovimientosCuenta(cuentaId)` | Movimientos de cuenta |
+| `aprobarTransferencia(request)` | SP `sp_trf_aprobar_transferencia` |
+| `rechazarTransferencia(request)` | SP `sp_trf_rechazar_transferencia` |
+| `consultarTransferenciasPendientes(request)` | SP `sp_trf_consultar_pendientes_aprobacion_empresa` |
+| `verTransferencia(transferenciaId)` | Detalle de transferencia |
+| `listarTransferenciasEmpresa(empresaId)` | Transferencias filtradas por empresa |
+| `listarAprobacionesTransferencia(transferenciaId)` | Historial de aprobaciones de una transferencia |
+
+#### `AnalistaInternoUseCase` — Rol ANALISTA_INTERNO
+
+**Servicios inyectados:** `CliPersonaNaturalCrudService`, `CliEmpresaCrudService`, `CtaCuentaCrudService`, `CtaMovimientoCrudService`, `CrePrestamoCrudService`, `CrePrestamoAprobacionCrudService`, `TrfTransferenciaCrudService`, `AudBitacoraEventoCrudService`, `AudCambioDatoCrudService`, `AudErrorOperacionCrudService`, `SpCliCambiarEstadoClienteService`, `SpCtaBloquearCuentaService`, `SpCtaCancelarCuentaService`, `SpCreAprobarPrestamoService`, `SpCreRechazarPrestamoService`, `SpCreDesembolsarPrestamoService`, `SpTrfVencerTransferenciasPendientesService`, `SpAudRegistrarEventoService`
+
+| Grupo | Métodos |
+|-------|---------|
+| Clientes | `listarPersonas`, `verPersona`, `listarEmpresas`, `verEmpresa`, `cambiarEstadoCliente` |
+| Cuentas | `listarCuentas`, `verCuenta`, `listarMovimientosCuenta`, `bloquearCuenta`, `cancelarCuenta` |
+| Préstamos | `listarPrestamos`, `verPrestamo`, `listarAprobacionesPrestamo`, `aprobarPrestamo`, `rechazarPrestamo`, `desembolsarPrestamo` |
+| Transferencias | `listarTransferencias`, `verTransferencia`, `vencerTransferenciasPendientes` |
+| Auditoría | `listarBitacora`, `verEventoBitacora`, `listarCambiosDatos`, `listarErroresOperacion`, `registrarEvento` |
+
+### 14.3 Decisiones de diseño
+
+| Decisión | Alternativa descartada | Razón |
+|----------|----------------------|-------|
+| Un UseCase por rol | UseCase por módulo funcional | Cada rol define un contrato de permisos cerrado; facilita mapear controllers 1:1 con roles |
+| Sin `@Transactional` en UseCase | Transacción a nivel UseCase | Los SP services y CRUD services ya gestionan sus propias transacciones; agregar otra encima introduciría anidamiento innecesario |
+| Filtros en Java para "mis X" | Métodos de repositorio filtrados | Los repositorios CRUD actuales no tienen métodos filtrados por titular; para el alcance del proyecto el filtro en stream es aceptable |
+| Inyección explícita de cada servicio | Wildcard imports con autodetección | Hace visible en la firma del clase qué servicios tiene el rol; facilita auditoría de permisos |
+
+---
+
+## 15. Historial de commits
 
 ### Commit 1 — Capa de dominio completa
 
@@ -640,6 +934,39 @@ feat: CRUD layer for SOPORTE_INFORMACION role - services, DTOs and exceptions
 - 108 DTOs CRUD en `domain/dto/` (36×Create + 36×Update + 36×Response)
 - 36 servicios CRUD en `domain/services/crud/`
 
+### Commit 3 — Corrección de bugs y capa de aplicación por roles
+
+```
+feat: corregir bugs en servicios CRUD y agregar capa de aplicacion con use cases por rol
+```
+
+**Contenido:**
+
+*Corrección de bugs (§12):*
+- `CliEmpresaRepository`: renombrado `findByRuc` → `findByNit` (corrección de runtime)
+- `CliEmpresaCrudService`: actualizado para usar `findByNit`
+- `SecUsuarioRolCrudService`: validación de duplicado usuario-rol
+- `CliEmpresaUsuarioCrudService`: validación de duplicado empresa-usuario
+- `CliEmpresaUsuarioRolCrudService`: validación de duplicado empresaUsuario-rolEmpresa
+- `CatTransicionEstadoRepository`: nuevo método `existsByEntidadAndEstadoOrigenCodigoAndEstadoDestinoCodigo`
+- `CatTransicionEstadoCrudService`: validación de duplicado compuesto
+- `CrePrestamoAprobacionRepository`: nuevo método `existsByPrestamoId`
+- `CrePrestamoAprobacionCrudService`: validación `decision=RECHAZADO` requiere motivo + validación de aprobación duplicada
+- `TransferenciaInvalidaException`: nuevo constructor con razón libre
+- `TrfTransferenciaCrudService`: validación cuenta origen ≠ cuenta destino
+
+*Capa de aplicación (§13 y §14):*
+- Definición formal de la Matriz de Roles vs Operaciones (7 roles × todas las operaciones)
+- 7 Use Cases en `application/usecase/`:
+  - `ClientePersonaUseCase`
+  - `ClienteEmpresaAdminUseCase`
+  - `EmpleadoVentanillaUseCase`
+  - `EmpleadoComercialUseCase`
+  - `EmpleadoEmpresaOperativoUseCase`
+  - `SupervisorEmpresaUseCase`
+  - `AnalistaInternoUseCase`
+- Actualización de `SDD/generacion_backend.md` con §12, §13, §14
+
 ### Repositorio
 
 ```
@@ -664,8 +991,9 @@ Rama: main
 | DTOs UpdateRequest (CRUD) | 36 |
 | DTOs Response (CRUD) | 36 |
 | Servicios CRUD | 36 |
+| Use Cases de aplicación | 7 |
 | Clases de configuración | 2 |
-| **Total de clases Java** | **302** |
+| **Total de clases Java** | **309** |
 
 ---
 

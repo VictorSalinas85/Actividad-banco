@@ -7,6 +7,7 @@ import bd2.Banco.domain.entities.CatRolEmpresa;
 import bd2.Banco.domain.entities.CliEmpresaUsuario;
 import bd2.Banco.domain.entities.CliEmpresaUsuarioRol;
 import bd2.Banco.domain.exceptions.EntidadNoEncontradaException;
+import bd2.Banco.domain.exceptions.RegistroDuplicadoException;
 import bd2.Banco.domain.repositories.CatRolEmpresaRepository;
 import bd2.Banco.domain.repositories.CliEmpresaUsuarioRepository;
 import bd2.Banco.domain.repositories.CliEmpresaUsuarioRolRepository;
@@ -31,6 +32,9 @@ public class CliEmpresaUsuarioRolCrudService {
                 .orElseThrow(() -> new EntidadNoEncontradaException("CliEmpresaUsuario", request.getEmpresaUsuarioId()));
         CatRolEmpresa rolEmpresa = catRolEmpresaRepository.findById(request.getRolEmpresaId())
                 .orElseThrow(() -> new EntidadNoEncontradaException("CatRolEmpresa", request.getRolEmpresaId()));
+        if (repository.existsByEmpresaUsuarioIdAndRolEmpresaId(request.getEmpresaUsuarioId(), request.getRolEmpresaId())) {
+            throw new RegistroDuplicadoException("empresaUsuario-rolEmpresa", request.getEmpresaUsuarioId() + "-" + request.getRolEmpresaId());
+        }
         CliEmpresaUsuarioRol entity = CliEmpresaUsuarioRol.builder()
                 .empresaUsuario(empresaUsuario)
                 .rolEmpresa(rolEmpresa)

@@ -31,7 +31,7 @@ public class CliEmpresaCrudService {
 
     @Transactional
     public CliEmpresaResponse crear(CliEmpresaCreateRequest request) {
-        repository.findByRuc(request.getNit()).ifPresent(e -> {
+        repository.findByNit(request.getNit()).ifPresent(e -> {
             throw new RegistroDuplicadoException("nit", request.getNit());
         });
         CatTipoIdentificacion tipoIdentificacion = catTipoIdentificacionRepository.findById(request.getTipoIdentificacionId())

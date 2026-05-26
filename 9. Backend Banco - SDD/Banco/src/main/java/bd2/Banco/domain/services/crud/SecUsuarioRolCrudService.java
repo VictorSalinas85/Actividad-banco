@@ -7,6 +7,7 @@ import bd2.Banco.domain.entities.SecRol;
 import bd2.Banco.domain.entities.SecUsuario;
 import bd2.Banco.domain.entities.SecUsuarioRol;
 import bd2.Banco.domain.exceptions.EntidadNoEncontradaException;
+import bd2.Banco.domain.exceptions.RegistroDuplicadoException;
 import bd2.Banco.domain.repositories.SecRolRepository;
 import bd2.Banco.domain.repositories.SecUsuarioRepository;
 import bd2.Banco.domain.repositories.SecUsuarioRolRepository;
@@ -31,6 +32,9 @@ public class SecUsuarioRolCrudService {
                 .orElseThrow(() -> new EntidadNoEncontradaException("SecUsuario", request.getUsuarioId()));
         SecRol rol = secRolRepository.findById(request.getRolId())
                 .orElseThrow(() -> new EntidadNoEncontradaException("SecRol", request.getRolId()));
+        if (repository.existsByUsuarioIdAndRolId(request.getUsuarioId(), request.getRolId())) {
+            throw new RegistroDuplicadoException("usuario-rol", request.getUsuarioId() + "-" + request.getRolId());
+        }
         SecUsuarioRol entity = SecUsuarioRol.builder()
                 .usuario(usuario)
                 .rol(rol)

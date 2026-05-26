@@ -5,6 +5,7 @@ import bd2.Banco.domain.dto.request.CatTransicionEstadoUpdateRequest;
 import bd2.Banco.domain.dto.response.CatTransicionEstadoResponse;
 import bd2.Banco.domain.entities.CatTransicionEstado;
 import bd2.Banco.domain.exceptions.EntidadNoEncontradaException;
+import bd2.Banco.domain.exceptions.RegistroDuplicadoException;
 import bd2.Banco.domain.repositories.CatTransicionEstadoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,12 @@ public class CatTransicionEstadoCrudService {
 
     @Transactional
     public CatTransicionEstadoResponse crear(CatTransicionEstadoCreateRequest request) {
+        if (repository.existsByEntidadAndEstadoOrigenCodigoAndEstadoDestinoCodigo(
+                request.getEntidad(), request.getEstadoOrigenCodigo(), request.getEstadoDestinoCodigo())) {
+            throw new RegistroDuplicadoException(
+                    "entidad-estadoOrigen-estadoDestino",
+                    request.getEntidad() + "-" + request.getEstadoOrigenCodigo() + "-" + request.getEstadoDestinoCodigo());
+        }
         CatTransicionEstado entity = CatTransicionEstado.builder()
                 .entidad(request.getEntidad())
                 .estadoOrigenCodigo(request.getEstadoOrigenCodigo())

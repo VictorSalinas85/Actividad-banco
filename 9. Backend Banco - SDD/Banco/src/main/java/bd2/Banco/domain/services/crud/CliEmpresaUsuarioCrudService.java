@@ -7,6 +7,7 @@ import bd2.Banco.domain.entities.CliEmpresa;
 import bd2.Banco.domain.entities.CliEmpresaUsuario;
 import bd2.Banco.domain.entities.SecUsuario;
 import bd2.Banco.domain.exceptions.EntidadNoEncontradaException;
+import bd2.Banco.domain.exceptions.RegistroDuplicadoException;
 import bd2.Banco.domain.repositories.CliEmpresaRepository;
 import bd2.Banco.domain.repositories.CliEmpresaUsuarioRepository;
 import bd2.Banco.domain.repositories.SecUsuarioRepository;
@@ -31,6 +32,9 @@ public class CliEmpresaUsuarioCrudService {
                 .orElseThrow(() -> new EntidadNoEncontradaException("CliEmpresa", request.getEmpresaId()));
         SecUsuario usuario = secUsuarioRepository.findById(request.getUsuarioId())
                 .orElseThrow(() -> new EntidadNoEncontradaException("SecUsuario", request.getUsuarioId()));
+        if (repository.existsByEmpresaIdAndUsuarioId(request.getEmpresaId(), request.getUsuarioId())) {
+            throw new RegistroDuplicadoException("empresa-usuario", request.getEmpresaId() + "-" + request.getUsuarioId());
+        }
         CliEmpresaUsuario entity = CliEmpresaUsuario.builder()
                 .empresa(empresa)
                 .usuario(usuario)

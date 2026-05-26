@@ -14,4 +14,5 @@ public interface CrePrestamoAprobacionRepository extends JpaRepository<CrePresta
     Optional<CrePrestamoAprobacion> findTopByPrestamoIdOrderByFechaDecisionDesc(Long prestamoId);
     List<CrePrestamoAprobacion> findByDecision(DecisionAprobacionPrestamo decision);
     List<CrePrestamoAprobacion> findByAnalistaId(Long analistaId);
+    boolean existsByPrestamoId(Long prestamoId);
 }
