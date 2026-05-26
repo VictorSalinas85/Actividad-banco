@@ -11,9 +11,9 @@ import java.util.Optional;
 @Repository
 public interface CatTransicionEstadoRepository extends JpaRepository<CatTransicionEstado, Long> {
     List<CatTransicionEstado> findByEntidad(EntidadTransicion entidad);
-    Optional<CatTransicionEstado> findByEntidadAndEstadoOrigenIdAndEstadoDestinoId(
-            EntidadTransicion entidad, Long estadoOrigenId, Long estadoDestinoId);
-    List<CatTransicionEstado> findByEntidadAndEstadoOrigenId(EntidadTransicion entidad, Long estadoOrigenId);
+    Optional<CatTransicionEstado> findByEntidadAndEstadoOrigenCodigoAndEstadoDestinoCodigo(
+            EntidadTransicion entidad, String estadoOrigenCodigo, String estadoDestinoCodigo);
+    List<CatTransicionEstado> findByEntidadAndEstadoOrigenCodigo(EntidadTransicion entidad, String estadoOrigenCodigo);
     boolean existsByEntidadAndEstadoOrigenCodigoAndEstadoDestinoCodigo(
             EntidadTransicion entidad, String estadoOrigenCodigo, String estadoDestinoCodigo);
 }

@@ -22,7 +22,7 @@ public class PrdProductoBancarioCrudService {
 
     @Transactional
     public PrdProductoBancarioResponse crear(PrdProductoBancarioCreateRequest request) {
-        repository.findByCodigo(request.getCodigoProducto()).ifPresent(e -> {
+        repository.findByCodigoProducto(request.getCodigoProducto()).ifPresent(e -> {
             throw new RegistroDuplicadoException("codigoProducto", request.getCodigoProducto());
         });
         PrdProductoBancario entity = PrdProductoBancario.builder()

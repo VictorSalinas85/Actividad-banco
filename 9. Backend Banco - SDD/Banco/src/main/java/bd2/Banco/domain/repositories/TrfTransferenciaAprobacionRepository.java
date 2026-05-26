@@ -10,8 +10,8 @@ import java.util.Optional;
 
 @Repository
 public interface TrfTransferenciaAprobacionRepository extends JpaRepository<TrfTransferenciaAprobacion, Long> {
-    List<TrfTransferenciaAprobacion> findByTransferenciaIdOrderByFechaDecisionDesc(Long transferenciaId);
-    Optional<TrfTransferenciaAprobacion> findTopByTransferenciaIdOrderByFechaDecisionDesc(Long transferenciaId);
+    List<TrfTransferenciaAprobacion> findByTransferenciaIdOrderByCreatedAtDesc(Long transferenciaId);
+    Optional<TrfTransferenciaAprobacion> findTopByTransferenciaIdOrderByCreatedAtDesc(Long transferenciaId);
     List<TrfTransferenciaAprobacion> findByDecision(DecisionAprobacionTransferencia decision);
-    List<TrfTransferenciaAprobacion> findByAprobadorId(Long aprobadorId);
+    List<TrfTransferenciaAprobacion> findByAprobadorUsuarioId(Long aprobadorUsuarioId);
 }

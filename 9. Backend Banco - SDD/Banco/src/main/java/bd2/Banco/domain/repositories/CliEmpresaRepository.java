@@ -9,6 +9,5 @@ import java.util.Optional;
 @Repository
 public interface CliEmpresaRepository extends JpaRepository<CliEmpresa, Long> {
     Optional<CliEmpresa> findByNit(String nit);
-    Optional<CliEmpresa> findBySecUsuarioId(Long usuarioId);
     boolean existsByNit(String nit);
 }

@@ -11,6 +11,6 @@ import java.util.Optional;
 public interface SecSesionRepository extends JpaRepository<SecSesion, Long> {
     Optional<SecSesion> findByToken(String token);
     List<SecSesion> findByUsuarioId(Long usuarioId);
-    List<SecSesion> findByUsuarioIdAndCatEstadoSesionCodigo(Long usuarioId, String codigoEstado);
-    Optional<SecSesion> findByTokenAndCatEstadoSesionCodigo(String token, String codigoEstado);
+    List<SecSesion> findByUsuarioIdAndEstadoSesionCodigo(Long usuarioId, String codigoEstado);
+    Optional<SecSesion> findByTokenAndEstadoSesionCodigo(String token, String codigoEstado);
 }

@@ -10,8 +10,8 @@ import java.util.Optional;
 
 @Repository
 public interface PrdProductoBancarioRepository extends JpaRepository<PrdProductoBancario, Long> {
-    Optional<PrdProductoBancario> findByCodigo(String codigo);
-    Optional<PrdProductoBancario> findByCodigoAndActivoTrue(String codigo);
+    Optional<PrdProductoBancario> findByCodigoProducto(String codigoProducto);
+    Optional<PrdProductoBancario> findByCodigoProductoAndActivoTrue(String codigoProducto);
     List<PrdProductoBancario> findByActivoTrue();
     List<PrdProductoBancario> findByCategoriaAndActivoTrue(CategoriaProducto categoria);
 }

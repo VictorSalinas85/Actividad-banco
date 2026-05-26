@@ -8,6 +8,6 @@ import java.util.List;
 
 @Repository
 public interface AudErrorOperacionRepository extends JpaRepository<AudErrorOperacion, Long> {
-    List<AudErrorOperacion> findByOperacionOrderByFechaErrorDesc(String operacion);
-    List<AudErrorOperacion> findByUsuarioIdOrderByFechaErrorDesc(Long usuarioId);
+    List<AudErrorOperacion> findByModuloOrderByCreatedAtDesc(String modulo);
+    List<AudErrorOperacion> findByActorUsuarioIdOrderByCreatedAtDesc(Long actorUsuarioId);
 }

@@ -13,5 +13,5 @@ public interface CrePrestamoRepository extends JpaRepository<CrePrestamo, Long> 
     List<CrePrestamo> findByClienteEmpresaId(Long clienteEmpresaId);
     List<CrePrestamo> findByClienteTipoAndClientePersonaId(TipoParticipante clienteTipo, Long clientePersonaId);
     List<CrePrestamo> findByClienteTipoAndClienteEmpresaId(TipoParticipante clienteTipo, Long clienteEmpresaId);
-    List<CrePrestamo> findByCatEstadoPrestamoId(Long estadoPrestamoId);
+    List<CrePrestamo> findByEstadoId(Long estadoId);
 }

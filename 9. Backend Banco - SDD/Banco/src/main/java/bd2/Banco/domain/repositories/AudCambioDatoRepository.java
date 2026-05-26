@@ -9,8 +9,7 @@ import java.util.List;
 
 @Repository
 public interface AudCambioDatoRepository extends JpaRepository<AudCambioDato, Long> {
-    List<AudCambioDato> findByEntidadAndEntidadIdOrderByFechaCambioDesc(String entidad, Long entidadId);
-    List<AudCambioDato> findByAccionAndEntidadOrderByFechaCambioDesc(AccionAuditoria accion, String entidad);
-    List<AudCambioDato> findByEntidadAndEntidadIdAndCampoOrderByFechaCambioDesc(
-            String entidad, Long entidadId, String campo);
+    List<AudCambioDato> findByTablaAndRegistroIdOrderByChangedAtDesc(String tabla, String registroId);
+    List<AudCambioDato> findByAccionAndTablaOrderByChangedAtDesc(AccionAuditoria accion, String tabla);
+    List<AudCambioDato> findByTablaOrderByChangedAtDesc(String tabla);
 }

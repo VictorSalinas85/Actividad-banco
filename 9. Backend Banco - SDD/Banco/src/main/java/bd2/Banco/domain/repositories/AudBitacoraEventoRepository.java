@@ -9,8 +9,8 @@ import java.util.List;
 
 @Repository
 public interface AudBitacoraEventoRepository extends JpaRepository<AudBitacoraEvento, Long> {
-    List<AudBitacoraEvento> findByProductoTipoAndProductoIdOrderByFechaEventoDesc(
-            ProductoTipo productoTipo, Long productoId);
-    List<AudBitacoraEvento> findByUsuarioIdOrderByFechaEventoDesc(Long usuarioId);
-    List<AudBitacoraEvento> findByProductoTipoOrderByFechaEventoDesc(ProductoTipo productoTipo);
+    List<AudBitacoraEvento> findByProductoTipoAndProductoIdOrderByFechaHoraOperacionDesc(
+            ProductoTipo productoTipo, String productoId);
+    List<AudBitacoraEvento> findByIdUsuarioOrderByFechaHoraOperacionDesc(Long idUsuario);
+    List<AudBitacoraEvento> findByProductoTipoOrderByFechaHoraOperacionDesc(ProductoTipo productoTipo);
 }

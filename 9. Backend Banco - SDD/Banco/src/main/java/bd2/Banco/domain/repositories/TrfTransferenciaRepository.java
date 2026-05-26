@@ -11,6 +11,6 @@ public interface TrfTransferenciaRepository extends JpaRepository<TrfTransferenc
     List<TrfTransferencia> findByCuentaOrigenId(Long cuentaOrigenId);
     List<TrfTransferencia> findByCuentaDestinoId(Long cuentaDestinoId);
     List<TrfTransferencia> findByEmpresaId(Long empresaId);
-    List<TrfTransferencia> findByCatEstadoTransferenciaId(Long estadoTransferenciaId);
-    List<TrfTransferencia> findByCreadorId(Long creadorId);
+    List<TrfTransferencia> findByEstadoId(Long estadoId);
+    List<TrfTransferencia> findByCreadorUsuarioId(Long creadorUsuarioId);
 }

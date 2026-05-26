@@ -28,7 +28,7 @@ public class CliPersonaNaturalCrudService {
 
     @Transactional
     public CliPersonaNaturalResponse crear(CliPersonaNaturalCreateRequest request) {
-        if (repository.existsByNumeroIdentificacion(request.getIdentificacion())) {
+        if (repository.existsByIdentificacion(request.getIdentificacion())) {
             throw new RegistroDuplicadoException("identificacion", request.getIdentificacion());
         }
         CatTipoIdentificacion tipoIdentificacion = catTipoIdentificacionRepository.findById(request.getTipoIdentificacionId())

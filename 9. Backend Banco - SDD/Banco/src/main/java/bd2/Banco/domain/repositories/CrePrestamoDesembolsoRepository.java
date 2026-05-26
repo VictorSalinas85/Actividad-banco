@@ -10,6 +10,6 @@ import java.util.Optional;
 @Repository
 public interface CrePrestamoDesembolsoRepository extends JpaRepository<CrePrestamoDesembolso, Long> {
     Optional<CrePrestamoDesembolso> findByPrestamoId(Long prestamoId);
-    List<CrePrestamoDesembolso> findByCuentaDesembolsoId(Long cuentaDesembolsoId);
+    List<CrePrestamoDesembolso> findByCuentaDestinoId(Long cuentaDestinoId);
     boolean existsByPrestamoId(Long prestamoId);
 }

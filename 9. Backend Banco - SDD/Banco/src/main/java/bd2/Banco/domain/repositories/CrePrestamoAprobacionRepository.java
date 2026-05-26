@@ -10,9 +10,9 @@ import java.util.Optional;
 
 @Repository
 public interface CrePrestamoAprobacionRepository extends JpaRepository<CrePrestamoAprobacion, Long> {
-    List<CrePrestamoAprobacion> findByPrestamoIdOrderByFechaDecisionDesc(Long prestamoId);
-    Optional<CrePrestamoAprobacion> findTopByPrestamoIdOrderByFechaDecisionDesc(Long prestamoId);
+    List<CrePrestamoAprobacion> findByPrestamoIdOrderByCreatedAtDesc(Long prestamoId);
+    Optional<CrePrestamoAprobacion> findTopByPrestamoIdOrderByCreatedAtDesc(Long prestamoId);
     List<CrePrestamoAprobacion> findByDecision(DecisionAprobacionPrestamo decision);
-    List<CrePrestamoAprobacion> findByAnalistaId(Long analistaId);
+    List<CrePrestamoAprobacion> findByAnalistaUsuarioId(Long analistaUsuarioId);
     boolean existsByPrestamoId(Long prestamoId);
 }

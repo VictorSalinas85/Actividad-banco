@@ -7,6 +7,7 @@ import bd2.Banco.domain.entities.CatMotivoRechazo;
 import bd2.Banco.domain.entities.CrePrestamo;
 import bd2.Banco.domain.entities.CrePrestamoAprobacion;
 import bd2.Banco.domain.entities.SecUsuario;
+import bd2.Banco.domain.enums.DecisionAprobacionPrestamo;
 import bd2.Banco.domain.exceptions.EntidadNoEncontradaException;
 import bd2.Banco.domain.exceptions.OperacionCrudNoPermitidaException;
 import bd2.Banco.domain.exceptions.RegistroDuplicadoException;
