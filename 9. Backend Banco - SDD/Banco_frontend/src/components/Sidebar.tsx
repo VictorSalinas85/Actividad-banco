@@ -145,16 +145,25 @@ export default function Sidebar() {
   const { hasRole } = useAuth()
 
   return (
-    <aside className="w-64 bg-slate-800 text-white flex flex-col min-h-screen">
-      <div className="px-6 py-5 border-b border-slate-700">
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">🏛️</span>
-          <div>
-            <p className="font-bold text-white leading-tight">Sistema Bancario</p>
-            <p className="text-xs text-slate-400">Panel de administración</p>
+    <aside className="w-72 bg-navy-gradient text-white flex flex-col min-h-screen shadow-navy-lg relative">
+      {/* Brand block con logo protagonista */}
+      <div className="px-6 pt-8 pb-6 border-b border-navy-700/60 relative">
+        <div className="flex flex-col items-center text-center">
+          <div className="relative">
+            <div className="absolute -inset-2 bg-gold-gradient opacity-20 rounded-full blur-xl"></div>
+            <img
+              src="/logo.png"
+              alt="Wolfstreet Bank"
+              className="relative w-40 h-40 object-contain drop-shadow-2xl select-none"
+              draggable={false}
+            />
           </div>
+          <p className="brand-sub text-gold-300 mt-2">Panel de administración</p>
         </div>
       </div>
+
+      {/* Línea dorada decorativa */}
+      <div className="h-[2px] bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
 
       <nav className="flex-1 overflow-y-auto py-4">
         {NAV.map((group) => {
@@ -163,8 +172,8 @@ export default function Sidebar() {
           )
           if (visibleItems.length === 0) return null
           return (
-            <div key={group.group} className="mb-2">
-              <p className="px-6 py-1 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <div key={group.group} className="mb-3">
+              <p className="px-6 py-1.5 text-[11px] font-bold text-gold-400/90 uppercase tracking-[0.2em]">
                 {group.group}
               </p>
               {visibleItems.map((item) => (
@@ -172,21 +181,27 @@ export default function Sidebar() {
                   key={item.path}
                   to={item.path}
                   className={({ isActive }) =>
-                    `flex items-center gap-3 px-6 py-2 text-sm transition-colors ${
+                    `group flex items-center gap-3 px-6 py-2.5 text-sm transition-all border-l-2 ${
                       isActive
-                        ? 'bg-blue-700 text-white font-medium'
-                        : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+                        ? 'bg-navy-700/70 text-white font-semibold border-gold-400'
+                        : 'text-navy-100 hover:bg-navy-700/40 hover:text-white border-transparent hover:border-gold-500/50'
                     }`
                   }
                 >
                   <span className="text-base">{item.icon}</span>
-                  {item.label}
+                  <span className="truncate">{item.label}</span>
                 </NavLink>
               ))}
             </div>
           )
         })}
       </nav>
+
+      <div className="px-6 py-3 border-t border-navy-700/60 text-center">
+        <p className="text-[10px] text-navy-300 uppercase tracking-widest">
+          Wolfstreet Bank &copy; {new Date().getFullYear()}
+        </p>
+      </div>
     </aside>
   )
 }

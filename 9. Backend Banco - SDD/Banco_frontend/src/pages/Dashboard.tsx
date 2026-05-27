@@ -61,56 +61,64 @@ export default function Dashboard() {
     .slice(0, 8) ?? []
 
   return (
-    <div className="max-w-4xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-800">
-          Bienvenido, {user?.nombreCompleto?.split(' ')[0]}
-        </h1>
-        <p className="text-slate-500 mt-1">
-          {user?.roles.map((r) => ROLE_LABELS[r] ?? r).join(' · ')}
-        </p>
+    <div className="max-w-5xl mx-auto">
+      {/* Hero card con branding */}
+      <div className="relative overflow-hidden rounded-2xl bg-navy-gradient text-white shadow-navy-lg mb-8">
+        <div className="absolute -right-12 -top-12 w-64 h-64 bg-gold-500/20 rounded-full blur-3xl" />
+        <div className="absolute right-6 top-1/2 -translate-y-1/2 opacity-90 hidden md:block">
+          <img src="/logo.png" alt="" className="h-40 w-40 object-contain drop-shadow-2xl" />
+        </div>
+        <div className="relative p-8 md:p-10">
+          <p className="brand-sub text-gold-300">Wolfstreet Bank</p>
+          <h1 className="text-3xl md:text-4xl font-extrabold mt-2">
+            Bienvenido, <span className="text-gold-300">{user?.nombreCompleto?.split(' ')[0]}</span>
+          </h1>
+          <p className="text-navy-100 mt-2 max-w-xl">
+            {user?.roles.map((r) => ROLE_LABELS[r] ?? r).join(' · ')}
+          </p>
+          <div className="mt-4 h-[2px] w-32 bg-gradient-to-r from-gold-400 to-transparent" />
+        </div>
       </div>
 
       {shortcuts.length > 0 && (
         <div className="mb-8">
-          <h2 className="text-lg font-semibold text-slate-700 mb-4">Accesos rápidos</h2>
+          <h2 className="text-lg font-bold text-navy-900 mb-1">Accesos rápidos</h2>
+          <p className="text-sm text-ink-500 mb-4">Operaciones más frecuentes según tu rol</p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {shortcuts.map((s) => (
               <a
                 key={s.path}
                 href={s.path}
-                className="card flex flex-col items-center py-6 gap-3 hover:border-blue-300
-                           hover:shadow-md transition-all cursor-pointer text-center"
+                className="group bg-white rounded-xl border border-navy-100 shadow-sm
+                           flex flex-col items-center py-6 gap-3 text-center
+                           hover:border-gold-400 hover:shadow-gold hover:-translate-y-0.5
+                           transition-all cursor-pointer"
               >
-                <span className="text-3xl">{s.icon}</span>
-                <span className="text-sm font-medium text-slate-700">{s.label}</span>
+                <span className="text-3xl group-hover:scale-110 transition-transform">{s.icon}</span>
+                <span className="text-sm font-semibold text-navy-800">{s.label}</span>
               </a>
             ))}
           </div>
         </div>
       )}
 
-      <div className="card">
-        <h2 className="text-lg font-semibold text-slate-700 mb-4">Información de sesión</h2>
+      <div className="card-accent">
+        <h2 className="text-lg font-bold text-navy-900 mb-1">Información de sesión</h2>
+        <p className="text-xs text-ink-500 mb-4">Datos del usuario autenticado</p>
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
-            <p className="text-slate-500">Usuario</p>
-            <p className="font-medium text-slate-800">{user?.username}</p>
+            <p className="text-ink-500 text-xs uppercase tracking-wider">Usuario</p>
+            <p className="font-semibold text-navy-900">{user?.username}</p>
           </div>
           <div>
-            <p className="text-slate-500">Email</p>
-            <p className="font-medium text-slate-800">{user?.email}</p>
+            <p className="text-ink-500 text-xs uppercase tracking-wider">Email</p>
+            <p className="font-semibold text-navy-900">{user?.email}</p>
           </div>
           <div className="col-span-2">
-            <p className="text-slate-500 mb-2">Roles asignados</p>
+            <p className="text-ink-500 text-xs uppercase tracking-wider mb-2">Roles asignados</p>
             <div className="flex flex-wrap gap-2">
               {user?.roles.map((r) => (
-                <span
-                  key={r}
-                  className="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full"
-                >
-                  {r}
-                </span>
+                <span key={r} className="badge badge-gold">{r}</span>
               ))}
             </div>
           </div>
@@ -118,8 +126,8 @@ export default function Dashboard() {
       </div>
 
       {hasRole('ANALISTA_INTERNO') && (
-        <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-          <p className="text-amber-800 text-sm font-medium">
+        <div className="mt-6 p-4 bg-gold-50 border-l-4 border-gold-500 rounded-lg shadow-sm">
+          <p className="text-navy-900 text-sm font-semibold">
             ⚡ Modo Analista Interno — Tienes acceso completo al sistema
           </p>
         </div>

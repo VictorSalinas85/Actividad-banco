@@ -6,7 +6,7 @@ import type { Column, Field } from '../types'
 import api from '../api/client'
 import type { ApiResponse } from '../types'
 
-interface Props<T extends Record<string, unknown>> {
+interface Props<T extends object> {
   title: string
   apiPath: string
   columns: Column<T>[]
@@ -18,7 +18,7 @@ interface Props<T extends Record<string, unknown>> {
   readOnly?: boolean
 }
 
-export default function CrudTable<T extends Record<string, unknown>>({
+export default function CrudTable<T extends object>({
   title,
   apiPath,
   columns,
@@ -65,7 +65,7 @@ export default function CrudTable<T extends Record<string, unknown>>({
   const openEdit = (item: T) => {
     setEditItem(item)
     const filled: Record<string, unknown> = {}
-    fields.forEach((f) => { filled[f.key] = item[f.key] ?? '' })
+    fields.forEach((f) => { filled[f.key] = (item as Record<string, unknown>)[f.key] ?? '' })
     setForm(filled)
     setShowModal(true)
   }
@@ -73,7 +73,7 @@ export default function CrudTable<T extends Record<string, unknown>>({
   const handleDelete = async (item: T) => {
     if (!confirm(`¿Eliminar este registro?`)) return
     try {
-      await api.delete(`${apiPath}/${item[idKey]}`)
+      await api.delete(`${apiPath}/${(item as Record<string, unknown>)[idKey]}`)
       toast.success('Registro eliminado')
       fetchItems()
     } catch (err: unknown) {
@@ -88,7 +88,7 @@ export default function CrudTable<T extends Record<string, unknown>>({
     setSubmitting(true)
     try {
       if (editItem) {
-        await api.put(`${apiPath}/${editItem[idKey]}`, form)
+        await api.put(`${apiPath}/${(editItem as Record<string, unknown>)[idKey]}`, form)
         toast.success('Registro actualizado')
       } else {
         await api.post(apiPath, form)
@@ -112,7 +112,7 @@ export default function CrudTable<T extends Record<string, unknown>>({
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-slate-800">{title}</h1>
+        <h1 className="text-2xl font-extrabold text-navy-900 tracking-wide">{title}</h1>
         {!readOnly && canCreate && (
           <button onClick={openCreate} className="btn-primary flex items-center gap-2">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -152,8 +152,8 @@ export default function CrudTable<T extends Record<string, unknown>>({
                     {columns.map((col) => (
                       <td key={String(col.key)} className="table-cell">
                         {col.render
-                          ? col.render(item[col.key as string], item)
-                          : String(item[col.key as string] ?? '')}
+                          ? col.render((item as Record<string, unknown>)[col.key as string], item)
+                          : String((item as Record<string, unknown>)[col.key as string] ?? '')}
                       </td>
                     ))}
                     {!readOnly && (canEdit || canDelete) && (
@@ -161,7 +161,7 @@ export default function CrudTable<T extends Record<string, unknown>>({
                         {canEdit && (
                           <button
                             onClick={() => openEdit(item)}
-                            className="text-blue-600 hover:text-blue-800 text-xs font-medium"
+                            className="text-navy-700 hover:text-gold-600 text-xs font-semibold transition-colors"
                           >
                             Editar
                           </button>
