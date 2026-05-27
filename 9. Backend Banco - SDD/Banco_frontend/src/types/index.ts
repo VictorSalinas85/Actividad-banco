@@ -95,13 +95,9 @@ export interface SecSesion {
 
 export interface CliPersonaNatural {
   id: number
-  usuarioId?: number
   tipoIdentificacionId: number
-  numeroIdentificacion: string
-  primerNombre: string
-  segundoNombre?: string
-  primerApellido: string
-  segundoApellido?: string
+  identificacion: string
+  nombreCompleto: string
   fechaNacimiento?: string
   email?: string
   telefono?: string
@@ -114,14 +110,14 @@ export interface CliPersonaNatural {
 
 export interface CliEmpresa {
   id: number
-  razonSocial: string
+  tipoIdentificacionId: number
   nit: string
-  sectorEconomico?: string
+  razonSocial: string
+  representantePersonaId: number
   email?: string
   telefono?: string
   direccion?: string
   estadoId: number
-  representanteLegalId?: number
   createdAt?: string
 }
 
@@ -149,8 +145,8 @@ export interface CtaCuenta {
   numeroCuenta: string
   tipoCuentaId: number
   monedaId: number
-  usuarioId?: number
-  empresaId?: number
+  titularPersonaId?: number
+  titularEmpresaId?: number
   saldo: number
   estadoId: number
   fechaApertura?: string
@@ -173,8 +169,8 @@ export interface CtaMovimiento {
 
 export interface CrePrestamo {
   id: number
-  usuarioId?: number
-  empresaId?: number
+  clientePersonaId?: number
+  clienteEmpresaId?: number
   tipoCreditoId: number
   montoSolicitado: number
   tasaInteres: number
@@ -285,7 +281,7 @@ export interface AudErrorOperacion {
   creadoEn?: string
 }
 
-// ─── Catálogos (todos con id, nombre, descripcion, activo) ────────────────
+// ─── Catálogos ─────────────────────────────────────────────────────────────
 
 export interface Catalogo {
   id: number
@@ -293,7 +289,16 @@ export interface Catalogo {
   descripcion?: string
   codigo?: string
   activo?: boolean
+  aplicaA?: string
   [key: string]: unknown
+}
+
+export interface TipoIdentificacion {
+  id: number
+  codigo: string
+  nombre: string
+  aplicaA?: 'PERSONA' | 'EMPRESA' | 'AMBOS'
+  activo?: boolean
 }
 
 // ─── Tipos para CrudTable ──────────────────────────────────────────────────
@@ -304,11 +309,16 @@ export interface Column<T> {
   render?: (value: unknown, row: T) => React.ReactNode
 }
 
+export type FieldType =
+  | 'text' | 'number' | 'email' | 'date' | 'select' | 'textarea' | 'checkbox'
+  | 'person-picker' | 'empresa-picker' | 'usuario-picker'
+
 export interface Field {
   key: string
   label: string
-  type: 'text' | 'number' | 'email' | 'date' | 'select' | 'textarea' | 'checkbox'
+  type: FieldType
   required?: boolean
   options?: { value: string | number; label: string }[]
   readOnly?: boolean
+  help?: string
 }
