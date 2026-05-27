@@ -146,19 +146,19 @@ export default function Sidebar() {
 
   return (
     <aside className="w-72 bg-navy-gradient text-white flex flex-col min-h-screen shadow-navy-lg relative">
-      {/* Brand block con logo protagonista */}
-      <div className="px-6 pt-8 pb-6 border-b border-navy-700/60 relative">
+      {/* Brand block con logo protagonista (PNG con fondo transparente) */}
+      <div className="px-6 pt-6 pb-4 border-b border-navy-700/60 relative">
         <div className="flex flex-col items-center text-center">
           <div className="relative">
-            <div className="absolute -inset-2 bg-gold-gradient opacity-20 rounded-full blur-xl"></div>
+            <div className="absolute -inset-4 bg-gold-gradient opacity-25 rounded-full blur-2xl" />
             <img
               src="/logo.png"
               alt="Wolfstreet Bank"
-              className="relative w-40 h-40 object-contain drop-shadow-2xl select-none"
+              className="relative w-48 h-48 object-contain drop-shadow-[0_10px_30px_rgba(212,162,78,0.35)] select-none"
               draggable={false}
             />
           </div>
-          <p className="brand-sub text-gold-300 mt-2">Panel de administración</p>
+          <p className="brand-sub text-gold-300 mt-1">Panel de administración</p>
         </div>
       </div>
 

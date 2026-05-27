@@ -36,22 +36,19 @@ export default function Login() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(212,162,78,0.18),transparent_55%)] pointer-events-none" />
 
       <div className="relative w-full max-w-5xl mx-4 grid lg:grid-cols-5 gap-8 items-center">
-        {/* Lado izquierdo: logo protagonista */}
-        <div className="lg:col-span-3 flex flex-col items-center lg:items-start text-center lg:text-left">
-          <div className="relative mb-6">
-            <div className="absolute -inset-6 bg-gold-gradient opacity-25 rounded-full blur-2xl" />
+        {/* Lado izquierdo: logo protagonista (el logo ya incluye 'WOLFSTREET BANK') */}
+        <div className="lg:col-span-3 flex flex-col items-center text-center">
+          <div className="relative">
+            <div className="absolute -inset-8 bg-gold-gradient opacity-20 rounded-full blur-3xl" />
             <img
               src="/logo.png"
               alt="Wolfstreet Bank"
-              className="relative w-72 h-72 lg:w-96 lg:h-96 object-contain drop-shadow-[0_10px_40px_rgba(212,162,78,0.4)] select-none"
+              className="relative w-80 h-80 lg:w-[28rem] lg:h-[28rem] object-contain drop-shadow-[0_15px_45px_rgba(212,162,78,0.45)] select-none"
               draggable={false}
             />
           </div>
-          <h1 className="text-4xl lg:text-5xl font-extrabold text-white tracking-wider">
-            WOLFSTREET <span className="text-gold-400">BANK</span>
-          </h1>
-          <div className="mt-3 h-[2px] w-48 bg-gradient-to-r from-gold-500 via-gold-300 to-transparent" />
-          <p className="mt-4 text-navy-100 text-lg max-w-md">
+          <div className="mt-2 h-[2px] w-56 bg-gradient-to-r from-transparent via-gold-400 to-transparent" />
+          <p className="mt-4 text-navy-100 text-base lg:text-lg max-w-md">
             Sistema integral de gestión bancaria. Operaciones, clientes y auditoría
             en una sola plataforma.
           </p>

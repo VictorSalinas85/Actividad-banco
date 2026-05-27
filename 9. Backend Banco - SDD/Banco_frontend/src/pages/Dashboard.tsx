@@ -64,11 +64,11 @@ export default function Dashboard() {
     <div className="max-w-5xl mx-auto">
       {/* Hero card con branding */}
       <div className="relative overflow-hidden rounded-2xl bg-navy-gradient text-white shadow-navy-lg mb-8">
-        <div className="absolute -right-12 -top-12 w-64 h-64 bg-gold-500/20 rounded-full blur-3xl" />
-        <div className="absolute right-6 top-1/2 -translate-y-1/2 opacity-90 hidden md:block">
-          <img src="/logo.png" alt="" className="h-40 w-40 object-contain drop-shadow-2xl" />
+        <div className="absolute -right-16 -top-16 w-72 h-72 bg-gold-500/25 rounded-full blur-3xl" />
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-90 hidden md:block">
+          <img src="/logo.png" alt="" className="h-48 w-48 object-contain drop-shadow-[0_10px_30px_rgba(212,162,78,0.35)]" />
         </div>
-        <div className="relative p-8 md:p-10">
+        <div className="relative p-8 md:p-10 md:pr-56">
           <p className="brand-sub text-gold-300">Wolfstreet Bank</p>
           <h1 className="text-3xl md:text-4xl font-extrabold mt-2">
             Bienvenido, <span className="text-gold-300">{user?.nombreCompleto?.split(' ')[0]}</span>
