@@ -14,10 +14,16 @@ export interface ApiError {
   details?: string[]
 }
 
+/**
+ * Contrato estándar de salida de todos los SPs del backend.
+ * Mapea los OUT params: out_code, out_message, out_reference.
+ * - `code` = 'OK' si la operación fue exitosa, sino un código de dominio
+ *   (p.ej. 'DOM-CLI-001', 'ERR', 'ERR-CTA-100').
+ */
 export interface SpResultado {
-  codigo: number
-  mensaje: string
-  dato?: string | number | null
+  code: string
+  message: string
+  reference?: string | null
 }
 
 // ─── Auth ──────────────────────────────────────────────────────────────────
@@ -144,13 +150,16 @@ export interface CtaCuenta {
   id: number
   numeroCuenta: string
   tipoCuentaId: number
+  titularTipo: 'PERSONA' | 'EMPRESA'
+  titularPersonaId?: number | null
+  titularEmpresaId?: number | null
+  saldoActual: number
+  limiteSobregirosAutorizado: number
   monedaId: number
-  titularPersonaId?: number
-  titularEmpresaId?: number
-  saldo: number
   estadoId: number
   fechaApertura?: string
   createdAt?: string
+  updatedAt?: string
 }
 
 export interface CtaMovimiento {
@@ -236,16 +245,16 @@ export interface TransferenciaPendienteResponse {
 
 // ─── Productos bancarios ───────────────────────────────────────────────────
 
+export type CategoriaProducto = 'CUENTAS' | 'PRESTAMOS' | 'SERVICIOS'
+
 export interface PrdProductoBancario {
   id: number
-  nombre: string
-  descripcion?: string
-  tipoCuentaId?: number
-  tasaInteres?: number
-  comisionMantenimiento?: number
-  saldoMinimo?: number
+  codigoProducto: string
+  nombreProducto: string
+  categoria: CategoriaProducto
   requiereAprobacion: boolean
   activo: boolean
+  createdAt?: string
 }
 
 // ─── Auditoría (solo lectura) ──────────────────────────────────────────────
@@ -311,7 +320,7 @@ export interface Column<T> {
 
 export type FieldType =
   | 'text' | 'number' | 'email' | 'date' | 'select' | 'textarea' | 'checkbox'
-  | 'person-picker' | 'empresa-picker' | 'usuario-picker'
+  | 'person-picker' | 'empresa-picker' | 'usuario-picker' | 'cuenta-picker'
 
 export interface Field {
   key: string

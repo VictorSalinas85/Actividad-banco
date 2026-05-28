@@ -20,7 +20,7 @@ export default function CuentasPage() {
     { key: 'tipoCuentaId', header: 'Tipo',
       render: (v) => {
         const t = tipos.data.find((x) => x.id === v)
-        return <code className="text-xs bg-ink-100 px-1.5 py-0.5 rounded">{t?.codigo ?? `#${v}`}</code>
+        return <code className="text-xs bg-navy-50 px-1.5 py-0.5 rounded">{t?.codigo ?? `#${v}`}</code>
       } },
     { key: 'titularPersonaId', header: 'Titular',
       render: (_v, row) => <ParticipanteDisplay personaId={row.titularPersonaId} empresaId={row.titularEmpresaId} compact /> },
@@ -29,7 +29,7 @@ export default function CuentasPage() {
         const m = monedas.data.find((x) => x.id === v)
         return <span className="text-xs">{m?.codigo ?? `#${v}`}</span>
       } },
-    { key: 'saldo', header: 'Saldo',
+    { key: 'saldoActual', header: 'Saldo',
       render: (v) => <MoneyValue value={Number(v)} /> },
     { key: 'estadoId', header: 'Estado',
       render: (v) => {
@@ -38,24 +38,25 @@ export default function CuentasPage() {
       } },
   ]
 
+  // CRUD usa IDs (no códigos). Para crear cuentas en producción, usar
+  // mejor "Operaciones → Cuentas → Abrir cuenta" (SP con validaciones de negocio).
   const fields: Field[] = [
     { key: 'numeroCuenta', label: 'Número de cuenta', type: 'text', required: true },
     { key: 'tipoCuentaId', label: 'Tipo de cuenta', type: 'select', required: true,
       options: tipos.data.map((t) => ({ value: t.id, label: `${t.codigo} — ${t.nombre}` })) },
     { key: 'monedaId', label: 'Moneda', type: 'select', required: true,
       options: monedas.data.map((m) => ({ value: m.id, label: `${m.codigo} — ${m.nombre}` })) },
-    { key: 'titularPersonaId', label: 'Titular persona (opcional)', type: 'person-picker' },
-    { key: 'titularEmpresaId', label: 'Titular empresa (opcional)', type: 'empresa-picker' },
-    { key: 'saldo', label: 'Saldo inicial', type: 'number', required: true },
-    { key: 'estadoId', label: 'Estado', type: 'select', required: true,
-      options: estados.data.map((e) => ({ value: e.id, label: `${e.codigo ?? ''} — ${e.nombre ?? ''}` })) },
+    { key: 'titularPersonaId', label: 'Titular persona (uno u otro)', type: 'person-picker' },
+    { key: 'titularEmpresaId', label: 'Titular empresa (uno u otro)', type: 'empresa-picker' },
+    { key: 'saldoActual',  label: 'Saldo inicial', type: 'number' },
+    { key: 'limiteSobregirosAutorizado', label: 'Límite sobregiro', type: 'number' },
   ]
 
   return (
     <div>
       <PageHeader
         title="Cuentas Bancarias"
-        description="Cuentas activas, bloqueadas y canceladas"
+        description="Cuentas activas, bloqueadas y canceladas. Para abrir cuentas con validaciones, usar Operaciones · Cuentas."
         icon={<CreditCard className="h-5 w-5" />}
       />
       <CrudTable<CtaCuenta>

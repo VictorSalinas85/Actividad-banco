@@ -2,49 +2,45 @@ import { ArrowLeftRight } from 'lucide-react'
 import { PageHeader } from '../../components/common'
 import OpSection from '../../components/OpSection'
 import { opsApi } from '../../api/resources'
-import { useTiposTrans, useMonedas, useMotivosRechazo } from '../../lib/useEntityList'
+import { useCanalesOp, useMotivosRechazo } from '../../lib/useEntityList'
 import type { Field } from '../../types'
 
 export default function OpsTransferenciasPage() {
-  const tipos    = useTiposTrans()
-  const monedas  = useMonedas()
+  const canales  = useCanalesOp()
   const motivos  = useMotivosRechazo()
 
   const crear: Field[] = [
-    { key: 'cuentaOrigenId',     label: 'ID cuenta origen', type: 'number', required: true },
-    { key: 'cuentaDestinoId',    label: 'ID cuenta destino', type: 'number', required: true },
-    { key: 'tipoTransferenciaId', label: 'Tipo', type: 'select', required: true,
-      options: tipos.data.map((t) => ({ value: t.id, label: `${t.codigo} — ${t.nombre}` })) },
-    { key: 'monto',    label: 'Monto', type: 'number', required: true },
-    { key: 'monedaId', label: 'Moneda', type: 'select', required: true,
-      options: monedas.data.map((m) => ({ value: m.id, label: `${m.codigo} — ${m.nombre}` })) },
-    { key: 'descripcion', label: 'Descripción', type: 'textarea' },
+    { key: 'cuentaOrigenId',  label: 'Cuenta origen',  type: 'cuenta-picker', required: true },
+    { key: 'cuentaDestinoId', label: 'Cuenta destino', type: 'cuenta-picker', required: true },
+    { key: 'empresaId',       label: 'Empresa (si aplica)', type: 'empresa-picker',
+      help: 'Solo si la transferencia es a nombre de una empresa cliente' },
+    { key: 'monto',           label: 'Monto', type: 'number', required: true },
+    { key: 'canalCodigo',     label: 'Canal', type: 'select', required: true,
+      options: canales.data.map((c) => ({ value: c.codigo ?? '', label: `${c.codigo ?? ''} — ${c.nombre ?? ''}` })) },
+    { key: 'idempotencyKey',  label: 'Clave de idempotencia (opcional)', type: 'text' },
   ]
 
   const aprobar: Field[] = [
     { key: 'transferenciaId', label: 'ID transferencia', type: 'number', required: true },
-    { key: 'aprobadorId',     label: 'Aprobador', type: 'usuario-picker', required: true },
-    { key: 'observaciones',   label: 'Observaciones', type: 'textarea' },
   ]
 
   const rechazar: Field[] = [
-    { key: 'transferenciaId', label: 'ID transferencia', type: 'number', required: true },
-    { key: 'aprobadorId',     label: 'Aprobador', type: 'usuario-picker', required: true },
-    { key: 'motivoId',        label: 'Motivo de rechazo', type: 'select', required: true,
-      options: motivos.data.map((m) => ({ value: m.id, label: `${m.codigo ?? ''} — ${m.nombre ?? ''}` })) },
-    { key: 'observaciones',   label: 'Observaciones', type: 'textarea' },
+    { key: 'transferenciaId',     label: 'ID transferencia', type: 'number', required: true },
+    { key: 'motivoRechazoCodigo', label: 'Motivo de rechazo', type: 'select', required: true,
+      options: motivos.data.map((m) => ({ value: m.codigo ?? '', label: `${m.codigo ?? ''} — ${m.nombre ?? ''}` })) },
+    { key: 'comentario',          label: 'Comentario', type: 'textarea' },
   ]
 
   const directa: Field[] = [
-    { key: 'cuentaOrigenId',  label: 'ID cuenta origen', type: 'number', required: true },
-    { key: 'cuentaDestinoId', label: 'ID cuenta destino', type: 'number', required: true },
+    { key: 'cuentaOrigenId',  label: 'Cuenta origen',  type: 'cuenta-picker', required: true },
+    { key: 'cuentaDestinoId', label: 'Cuenta destino', type: 'cuenta-picker', required: true },
     { key: 'monto',           label: 'Monto', type: 'number', required: true },
-    { key: 'descripcion',     label: 'Descripción', type: 'text' },
+    { key: 'canalCodigo',     label: 'Canal', type: 'select', required: true,
+      options: canales.data.map((c) => ({ value: c.codigo ?? '', label: `${c.codigo ?? ''} — ${c.nombre ?? ''}` })) },
+    { key: 'idempotencyKey',  label: 'Clave de idempotencia (opcional)', type: 'text' },
   ]
 
-  const vencer: Field[] = [
-    { key: 'horasVencimiento', label: 'Horas antigüedad para vencer', type: 'number', required: true },
-  ]
+  const vencer: Field[] = []
 
   const pendientes: Field[] = [
     { key: 'empresaId', label: 'Empresa', type: 'empresa-picker', required: true },
@@ -57,12 +53,18 @@ export default function OpsTransferenciasPage() {
         description="Crear, aprobar, rechazar y ejecutar transferencias"
         icon={<ArrowLeftRight className="h-5 w-5" />}
       />
-      <OpSection title="Crear transferencia"    fields={crear}      onSubmit={opsApi.crearTransferencia} />
-      <OpSection title="Aprobar transferencia"  fields={aprobar}    onSubmit={opsApi.aprobarTransferencia} />
-      <OpSection title="Rechazar transferencia" fields={rechazar}   onSubmit={opsApi.rechazarTransferencia} />
-      <OpSection title="Ejecutar directa"        fields={directa}    onSubmit={opsApi.ejecutarTransferenciaDirecta} />
-      <OpSection title="Vencer pendientes"       fields={vencer}     onSubmit={opsApi.vencerTransferenciasPendientes} />
-      <OpSection title="Pendientes por empresa"  fields={pendientes} onSubmit={opsApi.pendientesEmpresa} />
+      <OpSection title="Crear transferencia"    fields={crear}
+        description="Crea una transferencia que requerirá aprobación si supera el umbral." onSubmit={opsApi.crearTransferencia} />
+      <OpSection title="Aprobar transferencia"  fields={aprobar}
+        description="Aprueba una transferencia pendiente. Solo Supervisor de Empresa o Analista." onSubmit={opsApi.aprobarTransferencia} />
+      <OpSection title="Rechazar transferencia" fields={rechazar}
+        description="Rechaza una transferencia pendiente indicando motivo." onSubmit={opsApi.rechazarTransferencia} />
+      <OpSection title="Ejecutar transferencia directa" fields={directa}
+        description="Ejecuta una transferencia inmediata (sin pasar por aprobación)." onSubmit={opsApi.ejecutarTransferenciaDirecta} />
+      <OpSection title="Vencer transferencias pendientes" fields={vencer}
+        description="Marca como vencidas las transferencias que llevan demasiado tiempo pendientes." onSubmit={opsApi.vencerTransferenciasPendientes} />
+      <OpSection title="Pendientes por empresa"  fields={pendientes}
+        description="Consulta las transferencias pendientes de aprobación de la empresa." onSubmit={opsApi.pendientesEmpresa} />
     </div>
   )
 }

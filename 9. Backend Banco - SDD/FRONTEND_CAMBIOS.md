@@ -5,6 +5,12 @@
 
 ---
 
+## 0. Actualizacion 2026-05-27 (post-seed)
+
+- Se agregan pickers y lookups de cuentas/identificacion para formularios Ops.
+- Se incorpora un directorio de clientes/cuentas para resolucion rapida en UI.
+- Se incluyen scripts SQL auxiliares (vistas legibles, fix de collation, seed extra de productos).
+
 ## 1. Contexto
 
 El frontend había quedado a medio reconstruir tras un cambio de rama anterior:

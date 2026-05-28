@@ -79,6 +79,7 @@ export const useEstadosPrest   = () => useEntityList<Catalogo>('/catalogos/estad
 export const useTiposPrest     = () => useEntityList<Catalogo>('/catalogos/tipos-prestamo')
 export const useEstadosTrans   = () => useEntityList<Catalogo>('/catalogos/estados-transferencia')
 export const useTiposTrans     = () => useEntityList<Catalogo>('/catalogos/tipos-operacion')
+export const useTiposOp        = () => useEntityList<Catalogo>('/catalogos/tipos-operacion')
 export const useCanalesOp      = () => useEntityList<Catalogo>('/catalogos/canales-operacion')
 export const useMotivosRechazo = () => useEntityList<Catalogo>('/catalogos/motivos-rechazo')
 export const useMotivosBloqueo = () => useEntityList<Catalogo>('/catalogos/motivos-bloqueo')

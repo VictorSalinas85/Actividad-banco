@@ -5,4 +5,13 @@ export { default as EmptyState }            from './EmptyState'
 export { default as ConfirmDialog }         from './ConfirmDialog'
 export { default as StatCard }              from './StatCard'
 export { default as EntityPicker }          from './EntityPicker'
+export { default as CuentaPicker, invalidateCuentaCache } from './CuentaPicker'
 export { default as IdentificationDisplay, ParticipanteDisplay } from './IdentificationDisplay'
+export { default as IdentificacionLookup }  from './IdentificacionLookup'
+export { default as CuentaNumeroLookup }    from './CuentaNumeroLookup'
+export { default as CuentaPorIdentificacionPicker } from './CuentaPorIdentificacionPicker'
+export {
+  invalidateDirectorioCache, useDirectorio, getDirectorio,
+  findClienteByIdentificacion, findCuentaByNumero, findCuentasByIdentificacion,
+} from './directorio'
+export type { CuentaDir, PersonaDir, EmpresaDir } from './directorio'

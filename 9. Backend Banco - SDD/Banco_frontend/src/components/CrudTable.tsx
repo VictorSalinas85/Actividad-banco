@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import toast from 'react-hot-toast'
 import Modal from './Modal'
 import Spinner from './Spinner'
+import { EntityPicker, CuentaPicker } from './common'
 import type { Column, Field } from '../types'
 import api from '../api/client'
 import type { ApiResponse } from '../types'
@@ -217,10 +218,26 @@ export default function CrudTable<T extends object>({
               ) : field.type === 'checkbox' ? (
                 <input
                   type="checkbox"
-                  className="w-4 h-4 text-blue-600"
+                  className="w-4 h-4 accent-gold-500"
                   checked={!!form[field.key]}
                   onChange={(e) => handleChange(field.key, e.target.checked)}
                 />
+              ) : field.type === 'person-picker' ? (
+                <EntityPicker kind="persona"
+                  value={(form[field.key] as number | null) ?? null}
+                  onChange={(id) => handleChange(field.key, id)} />
+              ) : field.type === 'empresa-picker' ? (
+                <EntityPicker kind="empresa"
+                  value={(form[field.key] as number | null) ?? null}
+                  onChange={(id) => handleChange(field.key, id)} />
+              ) : field.type === 'usuario-picker' ? (
+                <EntityPicker kind="usuario"
+                  value={(form[field.key] as number | null) ?? null}
+                  onChange={(id) => handleChange(field.key, id)} />
+              ) : field.type === 'cuenta-picker' ? (
+                <CuentaPicker
+                  value={(form[field.key] as number | null) ?? null}
+                  onChange={(id) => handleChange(field.key, id)} />
               ) : (
                 <input
                   type={field.type}
@@ -236,6 +253,7 @@ export default function CrudTable<T extends object>({
                   readOnly={field.readOnly}
                 />
               )}
+              {field.help && <p className="help-text">{field.help}</p>}
             </div>
           ))}
           <div className="flex justify-end gap-3 pt-2">

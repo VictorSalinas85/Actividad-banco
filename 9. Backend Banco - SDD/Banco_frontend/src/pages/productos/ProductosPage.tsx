@@ -1,52 +1,55 @@
 import { Package } from 'lucide-react'
 import CrudTable from '../../components/CrudTable'
-import { PageHeader, MoneyValue } from '../../components/common'
+import { PageHeader } from '../../components/common'
 import type { Column, Field, PrdProductoBancario } from '../../types'
 import { useAuth } from '../../auth/AuthContext'
 import { ROLES } from '../../lib/constants'
-import { useTiposCuenta } from '../../lib/useEntityList'
+
+const CATEGORIA_OPTS = [
+  { value: 'CUENTAS',   label: 'CUENTAS — Productos de depósito y cuentas' },
+  { value: 'PRESTAMOS', label: 'PRESTAMOS — Productos de crédito' },
+  { value: 'SERVICIOS', label: 'SERVICIOS — Servicios bancarios complementarios' },
+]
+
+const CATEGORIA_BADGE: Record<string, string> = {
+  CUENTAS:   'bg-emerald-100 text-emerald-800',
+  PRESTAMOS: 'bg-gold-100 text-gold-800',
+  SERVICIOS: 'bg-navy-100 text-navy-800',
+}
 
 export default function ProductosPage() {
   const { hasRole } = useAuth()
   const canEdit = hasRole(ROLES.ADMIN)
-  const tipos = useTiposCuenta()
 
   const columns: Column<PrdProductoBancario>[] = [
     { key: 'id', header: 'ID' },
-    { key: 'nombre', header: 'Nombre' },
-    { key: 'descripcion', header: 'Descripción' },
-    { key: 'tipoCuentaId', header: 'Tipo cuenta',
-      render: (v) => {
-        const t = tipos.data.find((x) => x.id === v)
-        return t ? <code className="text-xs bg-ink-100 px-1.5 py-0.5 rounded">{t.codigo}</code> : <span className="text-slate-400">—</span>
-      } },
-    { key: 'tasaInteres', header: 'Tasa %',
-      render: (v) => v != null ? <span className="font-mono text-xs">{Number(v).toFixed(2)}</span> : '—' },
-    { key: 'saldoMinimo', header: 'Saldo mín.',
-      render: (v) => v != null ? <MoneyValue value={Number(v)} /> : '—' },
-    { key: 'activo', header: 'Activo',
+    { key: 'codigoProducto', header: 'Código',
+      render: (v) => <code className="text-xs bg-navy-50 px-1.5 py-0.5 rounded font-mono">{String(v ?? '')}</code> },
+    { key: 'nombreProducto', header: 'Nombre' },
+    { key: 'categoria', header: 'Categoría',
       render: (v) => (
-        <span className={`badge ${v ? 'badge-success' : 'badge-muted'}`}>{v ? 'Sí' : 'No'}</span>
+        <span className={`badge ${CATEGORIA_BADGE[String(v)] ?? 'badge-muted'}`}>{String(v ?? '')}</span>
       ) },
+    { key: 'requiereAprobacion', header: 'Aprobación',
+      render: (v) => v ? <span className="badge badge-warn">Sí</span> : <span className="badge badge-muted">No</span> },
+    { key: 'activo', header: 'Activo',
+      render: (v) => v ? <span className="badge badge-success">Sí</span> : <span className="badge badge-danger">No</span> },
   ]
 
   const fields: Field[] = [
-    { key: 'nombre', label: 'Nombre', type: 'text', required: true },
-    { key: 'descripcion', label: 'Descripción', type: 'textarea' },
-    { key: 'tipoCuentaId', label: 'Tipo de cuenta asociado', type: 'select',
-      options: tipos.data.map((t) => ({ value: t.id, label: `${t.codigo} — ${t.nombre}` })) },
-    { key: 'tasaInteres', label: 'Tasa interés (%)', type: 'number' },
-    { key: 'comisionMantenimiento', label: 'Comisión mantenimiento', type: 'number' },
-    { key: 'saldoMinimo', label: 'Saldo mínimo', type: 'number' },
+    { key: 'codigoProducto', label: 'Código del producto', type: 'text', required: true,
+      help: 'Identificador único corto (ej: CTA_AHORROS_BAS)' },
+    { key: 'nombreProducto', label: 'Nombre del producto', type: 'text', required: true },
+    { key: 'categoria',      label: 'Categoría', type: 'select', required: true, options: CATEGORIA_OPTS },
     { key: 'requiereAprobacion', label: 'Requiere aprobación', type: 'checkbox' },
-    { key: 'activo', label: 'Activo', type: 'checkbox' },
+    { key: 'activo',         label: 'Activo', type: 'checkbox' },
   ]
 
   return (
     <div>
       <PageHeader
         title="Productos Bancarios"
-        description="Catálogo de productos disponibles para clientes"
+        description="Catálogo de productos disponibles para clientes (cuentas, préstamos y servicios)"
         icon={<Package className="h-5 w-5" />}
       />
       <CrudTable<PrdProductoBancario>
