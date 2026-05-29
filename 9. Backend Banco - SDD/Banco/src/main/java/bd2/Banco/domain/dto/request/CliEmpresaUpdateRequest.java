@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CliEmpresaUpdateRequest {
+    private Long tipoIdentificacionId;
+    private String nit;
     private String razonSocial;
     private String email;
     private String telefono;

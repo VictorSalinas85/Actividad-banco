@@ -37,10 +37,12 @@ export default function PersonasPage() {
   // El estado se omite (el SP/backend asigna ACTIVO por defecto).
   const fields: Field[] = [
     { key: 'tipoIdentificacionId', label: 'Tipo de identificación', type: 'select', required: true,
+      immutableOnEdit: true,
       options: tipos.data
         .filter((t) => !t.aplicaA || t.aplicaA === 'PERSONA' || t.aplicaA === 'AMBOS')
         .map((t) => ({ value: t.id, label: `${t.codigo} — ${t.nombre}` })) },
-    { key: 'identificacion',  label: 'Número de identificación', type: 'text', required: true },
+    { key: 'identificacion',  label: 'Número de identificación', type: 'text', required: true,
+      immutableOnEdit: true },
     { key: 'nombreCompleto',  label: 'Nombre completo',          type: 'text', required: true },
     { key: 'fechaNacimiento', label: 'Fecha de nacimiento',      type: 'date' },
     { key: 'email',           label: 'Email',                    type: 'email' },

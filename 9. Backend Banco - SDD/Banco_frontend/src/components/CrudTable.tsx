@@ -6,6 +6,8 @@ import { EntityPicker, CuentaPicker } from './common'
 import type { Column, Field } from '../types'
 import api from '../api/client'
 import type { ApiResponse } from '../types'
+import { invalidateEntityCache } from '../lib/useEntityList'
+import { invalidateDirectorioCache, invalidateCuentaCache } from './common'
 
 interface Props<T extends object> {
   title: string
@@ -71,11 +73,24 @@ export default function CrudTable<T extends object>({
     setShowModal(true)
   }
 
+  // Tras escribir, invalidamos los cachés compartidos para que los dropdowns
+  // de otras páginas y el directorio de Ops reflejen los cambios al instante.
+  const invalidateRelatedCaches = useCallback(() => {
+    invalidateEntityCache(apiPath)
+    if (apiPath.startsWith('/personas') || apiPath.startsWith('/empresas') || apiPath.startsWith('/cuentas')) {
+      invalidateDirectorioCache()
+    }
+    if (apiPath.startsWith('/cuentas')) {
+      invalidateCuentaCache()
+    }
+  }, [apiPath])
+
   const handleDelete = async (item: T) => {
     if (!confirm(`¿Eliminar este registro?`)) return
     try {
       await api.delete(`${apiPath}/${(item as Record<string, unknown>)[idKey]}`)
       toast.success('Registro eliminado')
+      invalidateRelatedCaches()
       fetchItems()
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })
@@ -96,6 +111,7 @@ export default function CrudTable<T extends object>({
         toast.success('Registro creado')
       }
       setShowModal(false)
+      invalidateRelatedCaches()
       fetchItems()
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })
@@ -192,23 +208,31 @@ export default function CrudTable<T extends object>({
         size="md"
       >
         <form onSubmit={handleSubmit} className="space-y-4">
-          {fields.map((field) => (
+          {fields.map((field) => {
+            const locked = !!field.readOnly || (!!editItem && !!field.immutableOnEdit)
+            const lockedHint = !!editItem && !!field.immutableOnEdit
+              ? 'Este campo no se puede modificar después de crear el registro.'
+              : null
+            const lockedInputClass = locked ? 'input bg-navy-50 cursor-not-allowed text-ink-500' : 'input'
+            return (
             <div key={field.key}>
               <label className="label">{field.label}</label>
               {field.type === 'textarea' ? (
                 <textarea
-                  className="input"
+                  className={lockedInputClass}
                   value={String(form[field.key] ?? '')}
                   onChange={(e) => handleChange(field.key, e.target.value)}
                   required={field.required}
                   rows={3}
+                  readOnly={locked}
                 />
               ) : field.type === 'select' ? (
                 <select
-                  className="input"
+                  className={lockedInputClass}
                   value={String(form[field.key] ?? '')}
                   onChange={(e) => handleChange(field.key, e.target.value)}
                   required={field.required}
+                  disabled={locked}
                 >
                   <option value="">-- Seleccionar --</option>
                   {field.options?.map((opt) => (
@@ -221,19 +245,23 @@ export default function CrudTable<T extends object>({
                   className="w-4 h-4 accent-gold-500"
                   checked={!!form[field.key]}
                   onChange={(e) => handleChange(field.key, e.target.checked)}
+                  disabled={locked}
                 />
               ) : field.type === 'person-picker' ? (
                 <EntityPicker kind="persona"
                   value={(form[field.key] as number | null) ?? null}
-                  onChange={(id) => handleChange(field.key, id)} />
+                  onChange={(id) => handleChange(field.key, id)}
+                  disabled={locked} />
               ) : field.type === 'empresa-picker' ? (
                 <EntityPicker kind="empresa"
                   value={(form[field.key] as number | null) ?? null}
-                  onChange={(id) => handleChange(field.key, id)} />
+                  onChange={(id) => handleChange(field.key, id)}
+                  disabled={locked} />
               ) : field.type === 'usuario-picker' ? (
                 <EntityPicker kind="usuario"
                   value={(form[field.key] as number | null) ?? null}
-                  onChange={(id) => handleChange(field.key, id)} />
+                  onChange={(id) => handleChange(field.key, id)}
+                  disabled={locked} />
               ) : field.type === 'cuenta-picker' ? (
                 <CuentaPicker
                   value={(form[field.key] as number | null) ?? null}
@@ -241,7 +269,7 @@ export default function CrudTable<T extends object>({
               ) : (
                 <input
                   type={field.type}
-                  className="input"
+                  className={lockedInputClass}
                   value={String(form[field.key] ?? '')}
                   onChange={(e) =>
                     handleChange(
@@ -250,12 +278,14 @@ export default function CrudTable<T extends object>({
                     )
                   }
                   required={field.required}
-                  readOnly={field.readOnly}
+                  readOnly={locked}
                 />
               )}
-              {field.help && <p className="help-text">{field.help}</p>}
+              {(field.help || lockedHint) && (
+                <p className="help-text">{lockedHint ?? field.help}</p>
+              )}
             </div>
-          ))}
+          )})}
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={() => setShowModal(false)} className="btn-secondary">
               Cancelar

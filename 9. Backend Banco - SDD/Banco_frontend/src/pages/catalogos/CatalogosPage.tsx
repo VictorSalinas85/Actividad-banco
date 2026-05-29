@@ -40,7 +40,8 @@ const columns: Column<Catalogo>[] = [
 ]
 
 const fields: Field[] = [
-  { key: 'codigo', label: 'Código', type: 'text', required: true },
+  { key: 'codigo', label: 'Código', type: 'text', required: true, immutableOnEdit: true,
+    help: 'Identificador único del catálogo. No se puede modificar después de crear.' },
   { key: 'nombre', label: 'Nombre', type: 'text', required: true },
   { key: 'descripcion', label: 'Descripción', type: 'textarea' },
   { key: 'aplicaA', label: 'Aplica a (solo tipos identificación: PERSONA/EMPRESA/AMBOS)', type: 'text' },

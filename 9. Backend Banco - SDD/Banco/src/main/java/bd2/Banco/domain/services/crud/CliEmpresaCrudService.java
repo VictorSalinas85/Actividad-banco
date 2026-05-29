@@ -28,6 +28,7 @@ public class CliEmpresaCrudService {
     private final CatTipoIdentificacionRepository catTipoIdentificacionRepository;
     private final CliPersonaNaturalRepository cliPersonaNaturalRepository;
     private final CatEstadoUsuarioRepository catEstadoUsuarioRepository;
+    private final CrudContextResolver contextResolver;
 
     @Transactional
     public CliEmpresaResponse crear(CliEmpresaCreateRequest request) {
@@ -38,8 +39,10 @@ public class CliEmpresaCrudService {
                 .orElseThrow(() -> new EntidadNoEncontradaException("CatTipoIdentificacion", request.getTipoIdentificacionId()));
         CliPersonaNatural representante = cliPersonaNaturalRepository.findById(request.getRepresentantePersonaId())
                 .orElseThrow(() -> new EntidadNoEncontradaException("CliPersonaNatural", request.getRepresentantePersonaId()));
-        CatEstadoUsuario estado = catEstadoUsuarioRepository.findById(request.getEstadoId())
-                .orElseThrow(() -> new EntidadNoEncontradaException("CatEstadoUsuario", request.getEstadoId()));
+        Long estadoId = contextResolver.resolveEstadoUsuarioId(request.getEstadoId());
+        CatEstadoUsuario estado = catEstadoUsuarioRepository.findById(estadoId)
+                .orElseThrow(() -> new EntidadNoEncontradaException("CatEstadoUsuario", estadoId));
+        Long actor = contextResolver.resolveActor(request.getCreatedBy());
         CliEmpresa entity = CliEmpresa.builder()
                 .tipoIdentificacion(tipoIdentificacion)
                 .nit(request.getNit())
@@ -49,8 +52,8 @@ public class CliEmpresaCrudService {
                 .direccion(request.getDireccion())
                 .representantePersona(representante)
                 .estado(estado)
-                .createdBy(request.getCreatedBy())
-                .updatedBy(request.getCreatedBy())
+                .createdBy(actor)
+                .updatedBy(actor)
                 .rowVersion(1L)
                 .build();
         return toResponse(repository.save(entity));
@@ -60,17 +63,24 @@ public class CliEmpresaCrudService {
     public CliEmpresaResponse actualizar(Long id, CliEmpresaUpdateRequest request) {
         CliEmpresa entity = repository.findById(id)
                 .orElseThrow(() -> new EntidadNoEncontradaException("CliEmpresa", id));
-        CliPersonaNatural representante = cliPersonaNaturalRepository.findById(request.getRepresentantePersonaId())
-                .orElseThrow(() -> new EntidadNoEncontradaException("CliPersonaNatural", request.getRepresentantePersonaId()));
-        CatEstadoUsuario estado = catEstadoUsuarioRepository.findById(request.getEstadoId())
-                .orElseThrow(() -> new EntidadNoEncontradaException("CatEstadoUsuario", request.getEstadoId()));
-        entity.setRazonSocial(request.getRazonSocial());
-        entity.setEmail(request.getEmail());
-        entity.setTelefono(request.getTelefono());
-        entity.setDireccion(request.getDireccion());
-        entity.setRepresentantePersona(representante);
+
+        // tipo_identificacion_id y nit son inmutables por trigger en MySQL.
+        // Cualquier valor que venga en el body para esos campos se ignora.
+
+        if (request.getRepresentantePersonaId() != null) {
+            CliPersonaNatural representante = cliPersonaNaturalRepository.findById(request.getRepresentantePersonaId())
+                    .orElseThrow(() -> new EntidadNoEncontradaException("CliPersonaNatural", request.getRepresentantePersonaId()));
+            entity.setRepresentantePersona(representante);
+        }
+        Long estadoId = contextResolver.resolveEstadoUsuarioId(request.getEstadoId());
+        CatEstadoUsuario estado = catEstadoUsuarioRepository.findById(estadoId)
+                .orElseThrow(() -> new EntidadNoEncontradaException("CatEstadoUsuario", estadoId));
+        if (request.getRazonSocial() != null) entity.setRazonSocial(request.getRazonSocial());
+        if (request.getEmail() != null)       entity.setEmail(request.getEmail());
+        if (request.getTelefono() != null)    entity.setTelefono(request.getTelefono());
+        if (request.getDireccion() != null)   entity.setDireccion(request.getDireccion());
         entity.setEstado(estado);
-        entity.setUpdatedBy(request.getUpdatedBy());
+        entity.setUpdatedBy(contextResolver.resolveActor(request.getUpdatedBy()));
         return toResponse(repository.save(entity));
     }
 

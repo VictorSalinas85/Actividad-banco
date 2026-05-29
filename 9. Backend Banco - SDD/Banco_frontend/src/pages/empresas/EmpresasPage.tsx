@@ -34,10 +34,11 @@ export default function EmpresasPage() {
 
   const fields: Field[] = [
     { key: 'tipoIdentificacionId', label: 'Tipo de identificación', type: 'select', required: true,
+      immutableOnEdit: true,
       options: tipos.data
         .filter((t) => !t.aplicaA || t.aplicaA === 'EMPRESA' || t.aplicaA === 'AMBOS')
         .map((t) => ({ value: t.id, label: `${t.codigo} — ${t.nombre}` })) },
-    { key: 'nit',          label: 'NIT', type: 'text', required: true },
+    { key: 'nit',          label: 'NIT', type: 'text', required: true, immutableOnEdit: true },
     { key: 'razonSocial',  label: 'Razón social', type: 'text', required: true },
     { key: 'representantePersonaId', label: 'Representante legal', type: 'person-picker', required: true,
       help: 'Persona natural ya registrada' },

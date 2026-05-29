@@ -23,10 +23,10 @@ ON DUPLICATE KEY UPDATE nombre_completo = VALUES(nombre_completo);
 -- T001 - Alta cliente duplicado
 -- Esperado: segunda alta falla con DOM-CLI-001
 -- ==========================
-CALL sp_cli_crear_persona('CEDULA','1001001001','Juan Perez','juan.perez@demo.local','3001112233','1990-01-10','Calle 1',1,@out_code,@out_message,@out_reference);
+CALL sp_cli_crear_persona('CC','1001001001','Juan Perez Test','juan.perez.test@demo.local','3001112233','1990-01-10','Calle 1',1,@out_code,@out_message,@out_reference);
 SELECT 'T001-A' AS test_id, @out_code AS out_code, @out_message AS out_message, @out_reference AS out_reference;
 
-CALL sp_cli_crear_persona('CEDULA','1001001001','Juan Perez','juan.perez@demo.local','3001112233','1990-01-10','Calle 1',1,@out_code,@out_message,@out_reference);
+CALL sp_cli_crear_persona('CC','1001001001','Juan Perez Test','juan.perez.test@demo.local','3001112233','1990-01-10','Calle 1',1,@out_code,@out_message,@out_reference);
 SELECT 'T001-B' AS test_id, @out_code AS out_code, @out_message AS out_message, @out_reference AS out_reference;
 
 -- ==========================
@@ -39,7 +39,7 @@ CALL sp_cta_abrir_cuenta('PERSONA', @persona_id, 'AHORROS', 'USD', 0, 1, @out_co
 SET @cuenta_1 = CAST(@out_reference AS UNSIGNED);
 SELECT 'T002-A' AS test_id, @out_code, @out_message, @cuenta_1 AS cuenta_origen;
 
-CALL sp_cli_crear_persona('CEDULA','1001001002','Maria Gomez','maria.gomez@demo.local','3001112244','1992-03-12','Calle 2',1,@out_code,@out_message,@out_reference);
+CALL sp_cli_crear_persona('CC','1001001002','Maria Gomez Test','maria.gomez.test@demo.local','3001112244','1992-03-12','Calle 2',1,@out_code,@out_message,@out_reference);
 SET @persona_id2 = (SELECT id FROM cli_persona_natural WHERE identificacion = '1001001002' LIMIT 1);
 CALL sp_cta_abrir_cuenta('PERSONA', @persona_id2, 'AHORROS', 'USD', 0, 1, @out_code, @out_message, @out_reference);
 SET @cuenta_2 = CAST(@out_reference AS UNSIGNED);
@@ -51,7 +51,7 @@ SELECT 'T002-B' AS test_id, @out_code AS out_code, @out_message AS out_message, 
 -- T003 - Transferencia alto monto queda pendiente aprobacion
 -- Esperado: estado EN_ESPERA_APROBACION
 -- ==========================
-CALL sp_cli_crear_empresa('NIT','900100200','Empresa Demo SAS','empresa@demo.local','3002223344','Zona Industrial',@persona_id,1,@out_code,@out_message,@out_reference);
+CALL sp_cli_crear_empresa('NIT','900100200-1','Empresa Demo SAS','empresa.test@demo.local','3002223344','Zona Industrial',@persona_id,1,@out_code,@out_message,@out_reference);
 SET @empresa_id = CAST(@out_reference AS UNSIGNED);
 
 SET @usuario_supervisor = (SELECT id FROM sec_usuario WHERE username = 'supervisor_emp' LIMIT 1);

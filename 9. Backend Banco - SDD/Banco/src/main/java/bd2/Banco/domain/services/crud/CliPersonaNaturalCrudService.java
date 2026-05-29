@@ -25,6 +25,7 @@ public class CliPersonaNaturalCrudService {
     private final CliPersonaNaturalRepository repository;
     private final CatTipoIdentificacionRepository catTipoIdentificacionRepository;
     private final CatEstadoUsuarioRepository catEstadoUsuarioRepository;
+    private final CrudContextResolver contextResolver;
 
     @Transactional
     public CliPersonaNaturalResponse crear(CliPersonaNaturalCreateRequest request) {
@@ -33,8 +34,10 @@ public class CliPersonaNaturalCrudService {
         }
         CatTipoIdentificacion tipoIdentificacion = catTipoIdentificacionRepository.findById(request.getTipoIdentificacionId())
                 .orElseThrow(() -> new EntidadNoEncontradaException("CatTipoIdentificacion", request.getTipoIdentificacionId()));
-        CatEstadoUsuario estado = catEstadoUsuarioRepository.findById(request.getEstadoId())
-                .orElseThrow(() -> new EntidadNoEncontradaException("CatEstadoUsuario", request.getEstadoId()));
+        Long estadoId = contextResolver.resolveEstadoUsuarioId(request.getEstadoId());
+        CatEstadoUsuario estado = catEstadoUsuarioRepository.findById(estadoId)
+                .orElseThrow(() -> new EntidadNoEncontradaException("CatEstadoUsuario", estadoId));
+        Long actor = contextResolver.resolveActor(request.getCreatedBy());
         CliPersonaNatural entity = CliPersonaNatural.builder()
                 .tipoIdentificacion(tipoIdentificacion)
                 .identificacion(request.getIdentificacion())
@@ -44,8 +47,8 @@ public class CliPersonaNaturalCrudService {
                 .fechaNacimiento(request.getFechaNacimiento())
                 .direccion(request.getDireccion())
                 .estado(estado)
-                .createdBy(request.getCreatedBy())
-                .updatedBy(request.getCreatedBy())
+                .createdBy(actor)
+                .updatedBy(actor)
                 .rowVersion(1L)
                 .build();
         return toResponse(repository.save(entity));
@@ -55,14 +58,21 @@ public class CliPersonaNaturalCrudService {
     public CliPersonaNaturalResponse actualizar(Long id, CliPersonaNaturalUpdateRequest request) {
         CliPersonaNatural entity = repository.findById(id)
                 .orElseThrow(() -> new EntidadNoEncontradaException("CliPersonaNatural", id));
-        CatEstadoUsuario estado = catEstadoUsuarioRepository.findById(request.getEstadoId())
-                .orElseThrow(() -> new EntidadNoEncontradaException("CatEstadoUsuario", request.getEstadoId()));
-        entity.setNombreCompleto(request.getNombreCompleto());
-        entity.setEmail(request.getEmail());
-        entity.setTelefono(request.getTelefono());
-        entity.setDireccion(request.getDireccion());
+
+        // tipo_identificacion_id e identificacion son inmutables por trigger
+        // en MySQL ('identificacion es inmutable'). Los ignoramos aunque vengan
+        // en el body para no romper el UPDATE entero.
+
+        Long estadoId = contextResolver.resolveEstadoUsuarioId(request.getEstadoId());
+        CatEstadoUsuario estado = catEstadoUsuarioRepository.findById(estadoId)
+                .orElseThrow(() -> new EntidadNoEncontradaException("CatEstadoUsuario", estadoId));
+        if (request.getNombreCompleto() != null)  entity.setNombreCompleto(request.getNombreCompleto());
+        if (request.getEmail() != null)           entity.setEmail(request.getEmail());
+        if (request.getTelefono() != null)        entity.setTelefono(request.getTelefono());
+        if (request.getFechaNacimiento() != null) entity.setFechaNacimiento(request.getFechaNacimiento());
+        if (request.getDireccion() != null)       entity.setDireccion(request.getDireccion());
         entity.setEstado(estado);
-        entity.setUpdatedBy(request.getUpdatedBy());
+        entity.setUpdatedBy(contextResolver.resolveActor(request.getUpdatedBy()));
         return toResponse(repository.save(entity));
     }
 

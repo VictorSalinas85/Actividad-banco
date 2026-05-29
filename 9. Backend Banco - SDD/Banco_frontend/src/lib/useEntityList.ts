@@ -16,6 +16,26 @@ function notify(path: string) {
   subscribers.get(path)?.forEach((cb) => cb())
 }
 
+/**
+ * Invalida el caché de un path puntual (o todos si se omite) y notifica a los
+ * suscriptores para que vuelvan a pedir los datos. Usado por CrudTable y otras
+ * páginas tras crear/editar/borrar registros que alimentan dropdowns.
+ */
+export function invalidateEntityCache(path?: string) {
+  if (path) {
+    cache.delete(path)
+    api.get<ApiResponse<unknown[]>>(path)
+      .then((res) => {
+        cache.set(path, (res.data.data ?? []) as unknown[])
+        notify(path)
+      })
+      .catch(() => { /* el siguiente hook que monte volverá a intentar */ })
+  } else {
+    cache.clear()
+    Array.from(subscribers.keys()).forEach((p) => notify(p))
+  }
+}
+
 function useEntityList<T = Catalogo>(path: string): EntityListResult<T> {
   const [data, setData] = useState<T[]>(() => (cache.get(path) as T[]) ?? [])
   const [loading, setLoading] = useState(!cache.has(path))

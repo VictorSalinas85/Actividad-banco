@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useDirectorio, findCuentasByIdentificacion, type CuentaDir } from './directorio'
 
 interface Props {
@@ -9,17 +9,20 @@ interface Props {
   cuentaId: number | null
   onCuentaIdChange: (id: number | null) => void
   required?: boolean
+  /** Texto que describe la acción (ej. "bloquear", "cancelar"). */
+  actionLabel?: string
 }
 
 /**
- * Compuesto: input de identificacion + select de cuentas del cliente.
- * Util para operaciones como bloquear o cancelar cuenta, donde primero
- * se identifica al titular y luego se elige cual de sus cuentas operar.
+ * Picker para operaciones sobre la cuenta de un titular:
+ *  1) digita la identificación → valida y muestra el nombre,
+ *  2) lista todas las cuentas del titular como tarjetas,
+ *  3) el usuario hace click en la tarjeta de la cuenta a operar.
  */
 export default function CuentaPorIdentificacionPicker({
   identificacion, onIdentificacionChange,
   cuentaId, onCuentaIdChange,
-  required,
+  required, actionLabel = 'operar',
 }: Props) {
   const { data, loading } = useDirectorio()
   const { cliente, cuentas } = useMemo(() => {
@@ -37,52 +40,92 @@ export default function CuentaPorIdentificacionPicker({
   }, [identificacion, cuentas.length])
 
   return (
-    <div className="space-y-2">
-      <input
-        type="text"
-        className="input"
-        value={identificacion}
-        onChange={(e) => onIdentificacionChange(e.target.value)}
-        placeholder="Identificación del titular (CC, NIT, …)"
-        required={required}
-      />
-
-      {identificacion.trim() !== '' && (
-        <div className="text-xs">
-          {loading ? (
-            <span className="text-ink-400">Cargando…</span>
-          ) : !cliente ? (
-            <span className="text-amber-700">⚠ Identificación no encontrada</span>
-          ) : (
-            <span className="text-emerald-700">
-              ✓ <span className="font-semibold">{cliente.nombre}</span>
-              <span className="text-ink-500 ml-2 font-mono">[{cliente.tipo}]</span>
-            </span>
+    <div className="space-y-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <label className="label">Identificación del titular {required && <span className="text-red-500">*</span>}</label>
+          <input
+            type="text"
+            className="input"
+            value={identificacion}
+            onChange={(e) => onIdentificacionChange(e.target.value)}
+            placeholder="Digite CC, NIT, CE, TI o PAS"
+            required={required}
+          />
+          {identificacion.trim() !== '' && (
+            <p className="help-text">
+              {loading ? (
+                <span className="text-ink-400">Validando identificación…</span>
+              ) : !cliente ? (
+                <span className="text-amber-700">⚠ Identificación no encontrada en el directorio</span>
+              ) : (
+                <span className="text-emerald-700">✓ Identificación válida ({cliente.tipo})</span>
+              )}
+            </p>
           )}
         </div>
-      )}
+        <div>
+          <label className="label">Nombre del titular (auto-validado)</label>
+          <input
+            type="text"
+            className="input bg-navy-50"
+            value={cliente?.nombre ?? ''}
+            readOnly
+            placeholder="Se completa al validar la identificación"
+          />
+        </div>
+      </div>
 
       {cliente && (
         <div>
-          <label className="label">Cuenta del titular</label>
+          <label className="label">
+            Cuentas de <span className="font-semibold">{cliente.nombre}</span>
+            {cuentas.length > 0 && (
+              <span className="ml-2 text-xs text-ink-500">
+                ({cuentas.length} {cuentas.length === 1 ? 'cuenta' : 'cuentas'} — seleccione una para {actionLabel})
+              </span>
+            )}
+          </label>
+
           {cuentas.length === 0 ? (
-            <p className="text-xs text-amber-700">
-              El titular no tiene cuentas asociadas.
+            <p className="text-xs text-amber-700 mt-1">
+              ⚠ El titular {cliente.nombre} no tiene cuentas asociadas.
             </p>
           ) : (
-            <select
-              className="input"
-              value={cuentaId ?? ''}
-              onChange={(e) => onCuentaIdChange(e.target.value ? Number(e.target.value) : null)}
-              required={required}
-            >
-              <option value="">-- Seleccione una cuenta --</option>
-              {cuentas.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.numeroCuenta} · saldo ${Number(c.saldoActual).toLocaleString('es-CO')}
-                </option>
-              ))}
-            </select>
+            <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-1">
+              {cuentas.map((c) => {
+                const selected = c.id === cuentaId
+                return (
+                  <li key={c.id}>
+                    <button
+                      type="button"
+                      onClick={() => onCuentaIdChange(selected ? null : c.id)}
+                      className={`w-full text-left px-4 py-3 rounded-md border-2 transition-all ${
+                        selected
+                          ? 'border-gold-500 bg-gold-50 shadow-sm'
+                          : 'border-navy-200 bg-white hover:border-navy-400 hover:bg-navy-50'
+                      }`}
+                      aria-pressed={selected}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-sm font-semibold text-navy-900">{c.numeroCuenta}</span>
+                        {selected && <span className="text-xs font-bold text-gold-700">✓ SELECCIONADA</span>}
+                      </div>
+                      <div className="mt-1 text-xs text-ink-600 grid grid-cols-2 gap-x-3">
+                        <span>Saldo: <span className="font-mono">${Number(c.saldoActual).toLocaleString('es-CO')}</span></span>
+                        <span>ID: <span className="font-mono">{c.titularIdent}</span></span>
+                      </div>
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+
+          {required && cliente && cuentas.length > 0 && cuentaId == null && (
+            <p className="text-xs text-amber-700 mt-2">
+              Seleccione la cuenta a {actionLabel} antes de continuar.
+            </p>
           )}
         </div>
       )}

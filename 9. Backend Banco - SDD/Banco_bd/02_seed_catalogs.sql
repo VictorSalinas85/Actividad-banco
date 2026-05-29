@@ -35,11 +35,20 @@ INSERT INTO cat_estado_sesion(codigo, nombre) VALUES
 ('REVOCADA','Revocada')
 ON DUPLICATE KEY UPDATE nombre = VALUES(nombre);
 
+-- Tipos de identificacion estandarizados con el frontend Wolfstreet Bank.
+-- CC, TI, CE, PAS aplican a personas naturales.
+-- NIT aplica a empresas.
 INSERT INTO cat_tipo_identificacion(codigo, nombre, aplica_a) VALUES
-('DNI','Documento Nacional', 'PERSONA'),
-('CEDULA','Cedula', 'PERSONA'),
-('NIT','Numero Identificacion Tributaria', 'EMPRESA')
-ON DUPLICATE KEY UPDATE nombre = VALUES(nombre), aplica_a = VALUES(aplica_a);
+('CC' ,'Cedula de Ciudadania',            'PERSONA'),
+('TI' ,'Tarjeta de Identidad',            'PERSONA'),
+('CE' ,'Cedula de Extranjeria',           'PERSONA'),
+('PAS','Pasaporte',                       'PERSONA'),
+('NIT','Numero Identificacion Tributaria','EMPRESA')
+ON DUPLICATE KEY UPDATE nombre = VALUES(nombre), aplica_a = VALUES(aplica_a), activo = 1;
+
+-- Desactivar codigos legados (DNI, CEDULA) si estaban en una BD previa,
+-- sin borrarlos para preservar integridad referencial de registros antiguos.
+UPDATE cat_tipo_identificacion SET activo = 0 WHERE codigo IN ('DNI','CEDULA');
 
 INSERT INTO cat_tipo_cuenta(codigo, nombre, permite_sobregiro) VALUES
 ('AHORROS','Cuenta de Ahorros',0),

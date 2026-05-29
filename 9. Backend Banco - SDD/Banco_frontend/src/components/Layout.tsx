@@ -1,9 +1,21 @@
-import { Outlet } from 'react-router-dom'
+import { useEffect, useRef } from 'react'
+import { Outlet, useLocation } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import { useAuth } from '../auth/AuthContext'
 
 export default function Layout() {
   const { user, logout } = useAuth()
+  const location = useLocation()
+  const mainRef = useRef<HTMLElement | null>(null)
+
+  // Cada vez que cambia la ruta, llevar el panel principal al inicio para que
+  // el usuario aterrice siempre en el encabezado de la página seleccionada.
+  useEffect(() => {
+    mainRef.current?.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+    }
+  }, [location.pathname])
 
   const initials = (user?.nombreCompleto ?? user?.username ?? '?')
     .split(' ')
@@ -44,7 +56,7 @@ export default function Layout() {
             </button>
           </div>
         </header>
-        <main className="flex-1 p-8 overflow-auto">
+        <main ref={mainRef} className="flex-1 p-8 overflow-auto scroll-smooth">
           <Outlet />
         </main>
       </div>

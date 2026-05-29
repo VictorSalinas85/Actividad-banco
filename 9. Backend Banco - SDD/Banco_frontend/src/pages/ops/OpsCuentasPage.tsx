@@ -284,24 +284,20 @@ function BloquearCuentaForm({ motivos }: { motivos: Cat[] }) {
       <h2 className="text-lg font-bold text-navy-900 mb-1">Bloquear cuenta</h2>
       <p className="text-sm text-ink-500 mb-4">Identifique al titular y seleccione cuál de sus cuentas bloquear.</p>
       <form onSubmit={submit} className="space-y-3">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div className="md:col-span-2">
-            <label className="label">Identificación del titular <span className="text-red-500">*</span></label>
-            <CuentaPorIdentificacionPicker
-              identificacion={identificacion}
-              onIdentificacionChange={setIdentificacion}
-              cuentaId={cuentaId}
-              onCuentaIdChange={setCuentaId}
-              required
-            />
-          </div>
-          <div className="md:col-span-2">
-            <label className="label">Motivo del bloqueo <span className="text-red-500">*</span></label>
-            <select className="input" value={motivoCodigo} onChange={(e) => setMotivoCodigo(e.target.value)} required>
-              <option value="">-- Seleccionar --</option>
-              {motivos.map((m) => <option key={m.id} value={m.codigo ?? ''}>{m.codigo} — {m.nombre}</option>)}
-            </select>
-          </div>
+        <CuentaPorIdentificacionPicker
+          identificacion={identificacion}
+          onIdentificacionChange={setIdentificacion}
+          cuentaId={cuentaId}
+          onCuentaIdChange={setCuentaId}
+          required
+          actionLabel="bloquear"
+        />
+        <div>
+          <label className="label">Motivo del bloqueo <span className="text-red-500">*</span></label>
+          <select className="input" value={motivoCodigo} onChange={(e) => setMotivoCodigo(e.target.value)} required>
+            <option value="">-- Seleccionar --</option>
+            {motivos.map((m) => <option key={m.id} value={m.codigo ?? ''}>{m.codigo} — {m.nombre}</option>)}
+          </select>
         </div>
         <SubmitRow submitting={submitting} result={result} />
       </form>
@@ -351,6 +347,7 @@ function CancelarCuentaForm() {
           cuentaId={cuentaId}
           onCuentaIdChange={setCuentaId}
           required
+          actionLabel="cancelar"
         />
         <SubmitRow submitting={submitting} result={result} />
       </form>

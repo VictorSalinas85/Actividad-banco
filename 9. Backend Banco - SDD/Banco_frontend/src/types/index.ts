@@ -329,5 +329,10 @@ export interface Field {
   required?: boolean
   options?: { value: string | number; label: string }[]
   readOnly?: boolean
+  /**
+   * Si es true, el campo es editable al crear pero solo-lectura al editar.
+   * Útil para llaves naturales protegidas por trigger (identificación, NIT, etc.).
+   */
+  immutableOnEdit?: boolean
   help?: string
 }
