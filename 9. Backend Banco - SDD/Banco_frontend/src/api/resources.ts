@@ -59,7 +59,10 @@ export const empresasApi = crudFactory('/empresas')
 export const empresaUsuariosApi = crudFactory('/empresas/usuarios')
 export const empresaUsuarioRolesApi = crudFactory('/empresas/usuarios/roles')
 
-export const cuentasApi = crudFactory('/cuentas')
+export const cuentasApi = {
+  ...crudFactory('/cuentas'),
+  proximoNumero: () => api.get<ApiResponse<string>>('/cuentas/proximo-numero'),
+}
 export const movimientosApi = crudFactory('/cuentas/movimientos')
 
 export const prestamosApi = crudFactory('/prestamos')

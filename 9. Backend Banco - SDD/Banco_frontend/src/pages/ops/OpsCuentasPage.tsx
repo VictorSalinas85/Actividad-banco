@@ -1,17 +1,19 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { CreditCard } from 'lucide-react'
 import toast from 'react-hot-toast'
 import {
   PageHeader,
-  IdentificacionLookup,
+  TitularLookup,
   CuentaNumeroLookup,
   CuentaPorIdentificacionPicker,
+  MoneyInput,
   invalidateDirectorioCache,
   invalidateCuentaCache,
   type CuentaDir,
+  type TitularResuelto,
 } from '../../components/common'
 import OpSection from '../../components/OpSection'
-import { opsApi } from '../../api/resources'
+import { opsApi, cuentasApi } from '../../api/resources'
 import { useAuth } from '../../auth/AuthContext'
 import { useTiposCuenta, useMonedas, useMotivosBloqueo, useCanalesOp } from '../../lib/useEntityList'
 import type { Field, SpResultado } from '../../types'
@@ -50,22 +52,29 @@ export default function OpsCuentasPage() {
 
 function AbrirCuentaForm({ tipos, monedas }: { tipos: Cat[]; monedas: Cat[] }) {
   const { user } = useAuth()
-  const [identificacion, setIdentificacion] = useState('')
-  const [resolved, setResolved] = useState<{ tipo: 'PERSONA' | 'EMPRESA', id: number, nombre: string } | null>(null)
+  const [resolved, setResolved] = useState<TitularResuelto | null>(null)
   const [tipoCuentaCodigo, setTipoCuentaCodigo] = useState('')
   const [monedaCodigo, setMonedaCodigo] = useState('')
   const [limiteSobregiro, setLimiteSobregiro] = useState<number | ''>('')
   const [submitting, setSubmitting] = useState(false)
   const [result, setResult] = useState<SpResultado | null>(null)
+  const [proximoNumero, setProximoNumero] = useState('')
+
+  const cargarProximoNumero = () => {
+    cuentasApi.proximoNumero()
+      .then((res) => setProximoNumero(res.data.data ?? ''))
+      .catch(() => setProximoNumero(''))
+  }
+  useEffect(() => { cargarProximoNumero() }, [])
 
   const reset = () => {
-    setIdentificacion(''); setResolved(null)
+    setResolved(null)
     setTipoCuentaCodigo(''); setMonedaCodigo(''); setLimiteSobregiro('')
   }
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!resolved) { toast.error('Identificación no encontrada'); return }
+    if (!resolved) { toast.error('Seleccione el titular'); return }
     if (!tipoCuentaCodigo || !monedaCodigo) { toast.error('Complete tipo y moneda'); return }
     setSubmitting(true); setResult(null)
     try {
@@ -80,7 +89,7 @@ function AbrirCuentaForm({ tipos, monedas }: { tipos: Cat[]; monedas: Cat[] }) {
       const data = res.data.data as SpResultado | undefined
       if (data && 'code' in data) {
         setResult(data)
-        if (data.code === 'OK') { toast.success(data.message); invalidateCuentaCache(); invalidateDirectorioCache(); reset() }
+        if (data.code === 'OK') { toast.success(data.message); invalidateCuentaCache(); invalidateDirectorioCache(); reset(); cargarProximoNumero() }
         else toast.error(`[${data.code}] ${data.message}`)
       }
     } catch (err: unknown) {
@@ -91,21 +100,18 @@ function AbrirCuentaForm({ tipos, monedas }: { tipos: Cat[]; monedas: Cat[] }) {
   return (
     <div className="card mb-6">
       <h2 className="text-lg font-bold text-navy-900 mb-1">Abrir cuenta</h2>
-      <p className="text-sm text-ink-500 mb-4">Crea una nueva cuenta para el cliente identificado por su CC o NIT.</p>
+      <p className="text-sm text-ink-500 mb-4">Crea una nueva cuenta para el cliente. Busque al titular por nombre o identificación.</p>
       <form onSubmit={submit} className="space-y-3">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div>
-            <label className="label">Identificación del titular <span className="text-red-500">*</span></label>
-            <IdentificacionLookup
-              value={identificacion}
-              onChange={setIdentificacion}
-              onResolve={setResolved}
-              required
-            />
+          <div className="md:col-span-2">
+            <label className="label">Número de cuenta (asignado por el sistema)</label>
+            <input className="input bg-navy-50 font-mono" value={proximoNumero} readOnly placeholder="Se asigna automáticamente al abrir" />
+            <p className="help-text">Número que se asignará al crear la cuenta (consecutivo anual).</p>
           </div>
-          <div>
-            <label className="label">Nombre del titular</label>
-            <input className="input bg-navy-50" value={resolved?.nombre ?? ''} readOnly placeholder="Se completa automáticamente" />
+          <div className="md:col-span-2">
+            <label className="label">Titular <span className="text-red-500">*</span></label>
+            <TitularLookup value={resolved} onChange={setResolved} required />
+            <p className="help-text">Persona natural o empresa. Escriba el nombre o la identificación para filtrar.</p>
           </div>
           <div>
             <label className="label">Tipo de cuenta <span className="text-red-500">*</span></label>
@@ -123,8 +129,7 @@ function AbrirCuentaForm({ tipos, monedas }: { tipos: Cat[]; monedas: Cat[] }) {
           </div>
           <div className="md:col-span-2">
             <label className="label">Límite de sobregiro</label>
-            <input type="number" className="input" value={limiteSobregiro}
-              onChange={(e) => setLimiteSobregiro(e.target.value ? Number(e.target.value) : '')} />
+            <MoneyInput value={limiteSobregiro} onChange={setLimiteSobregiro} />
           </div>
         </div>
         <SubmitRow submitting={submitting} result={result} />
@@ -204,9 +209,7 @@ function MovimientoCuentaForm({
           </div>
           <div>
             <label className="label">Monto <span className="text-red-500">*</span></label>
-            <input type="number" className="input" value={monto}
-              onChange={(e) => setMonto(e.target.value ? Number(e.target.value) : '')}
-              min={0.01} step={0.01} required />
+            <MoneyInput value={monto} onChange={setMonto} required />
           </div>
           <div>
             <label className="label">Canal <span className="text-red-500">*</span></label>

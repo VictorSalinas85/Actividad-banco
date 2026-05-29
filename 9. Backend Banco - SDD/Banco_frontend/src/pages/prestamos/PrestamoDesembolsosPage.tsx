@@ -18,9 +18,9 @@ const columns: Column<CrePrestamoDesembolso>[] = [
 const fields: Field[] = [
   { key: 'prestamoId',         label: 'ID del préstamo', type: 'number', required: true },
   { key: 'cuentaDesembolsoId', label: 'ID cuenta destino', type: 'number', required: true },
-  { key: 'montoPrincipal',     label: 'Monto principal', type: 'number', required: true },
-  { key: 'montoIntereses',     label: 'Monto intereses', type: 'number', required: true },
-  { key: 'montoCargos',        label: 'Monto cargos',    type: 'number', required: true },
+  { key: 'montoPrincipal',     label: 'Monto principal', type: 'money', required: true },
+  { key: 'montoIntereses',     label: 'Monto intereses', type: 'money', required: true },
+  { key: 'montoCargos',        label: 'Monto cargos',    type: 'money', required: true },
 ]
 
 export default function PrestamoDesembolsosPage() {

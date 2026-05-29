@@ -5,6 +5,7 @@ import type { Column, Field, CtaCuenta } from '../../types'
 import { useAuth } from '../../auth/AuthContext'
 import { ROLES } from '../../lib/constants'
 import { useEstadosCuenta, useTiposCuenta, useMonedas } from '../../lib/useEntityList'
+import { cuentasApi } from '../../api/resources'
 
 export default function CuentasPage() {
   const { hasRole } = useAuth()
@@ -40,16 +41,19 @@ export default function CuentasPage() {
 
   // CRUD usa IDs (no códigos). Para crear cuentas en producción, usar
   // mejor "Operaciones → Cuentas → Abrir cuenta" (SP con validaciones de negocio).
+  // El número de cuenta lo asigna el sistema automáticamente (consecutivo anual
+  // AAAA0000000, p.ej. 20260000000); se muestra como solo-lectura y no se edita.
   const fields: Field[] = [
-    { key: 'numeroCuenta', label: 'Número de cuenta', type: 'text', required: true },
+    { key: 'numeroCuenta', label: 'Número de cuenta (asignado por el sistema)', type: 'text',
+      readOnly: true, help: 'Se asigna automáticamente al crear la cuenta.' },
     { key: 'tipoCuentaId', label: 'Tipo de cuenta', type: 'select', required: true,
       options: tipos.data.map((t) => ({ value: t.id, label: `${t.codigo} — ${t.nombre}` })) },
     { key: 'monedaId', label: 'Moneda', type: 'select', required: true,
       options: monedas.data.map((m) => ({ value: m.id, label: `${m.codigo} — ${m.nombre}` })) },
     { key: 'titularPersonaId', label: 'Titular persona (uno u otro)', type: 'person-picker' },
     { key: 'titularEmpresaId', label: 'Titular empresa (uno u otro)', type: 'empresa-picker' },
-    { key: 'saldoActual',  label: 'Saldo inicial', type: 'number' },
-    { key: 'limiteSobregirosAutorizado', label: 'Límite sobregiro', type: 'number' },
+    { key: 'saldoActual',  label: 'Saldo inicial', type: 'money' },
+    { key: 'limiteSobregirosAutorizado', label: 'Límite sobregiro', type: 'money' },
   ]
 
   return (
@@ -65,6 +69,10 @@ export default function CuentasPage() {
         columns={columns}
         fields={fields}
         canDelete={canDelete}
+        onOpenCreate={async () => {
+          const res = await cuentasApi.proximoNumero()
+          return { numeroCuenta: res.data.data ?? '' }
+        }}
       />
     </div>
   )

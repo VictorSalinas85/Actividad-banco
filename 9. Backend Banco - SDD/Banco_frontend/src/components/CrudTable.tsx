@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import toast from 'react-hot-toast'
 import Modal from './Modal'
 import Spinner from './Spinner'
-import { EntityPicker, CuentaPicker } from './common'
+import { EntityPicker, CuentaPicker, MoneyInput } from './common'
 import type { Column, Field } from '../types'
 import api from '../api/client'
 import type { ApiResponse } from '../types'
@@ -19,6 +19,12 @@ interface Props<T extends object> {
   canDelete?: boolean
   idKey?: string
   readOnly?: boolean
+  /**
+   * Se ejecuta al abrir el formulario de creación. Lo que devuelve se fusiona en
+   * el formulario, útil para precargar valores calculados por el servidor (p. ej.
+   * el próximo número de cuenta que se asignará).
+   */
+  onOpenCreate?: () => Promise<Record<string, unknown>>
 }
 
 export default function CrudTable<T extends object>({
@@ -31,6 +37,7 @@ export default function CrudTable<T extends object>({
   canDelete = true,
   idKey = 'id',
   readOnly = false,
+  onOpenCreate,
 }: Props<T>) {
   const [items, setItems] = useState<T[]>([])
   const [loading, setLoading] = useState(true)
@@ -53,7 +60,7 @@ export default function CrudTable<T extends object>({
 
   useEffect(() => { fetchItems() }, [fetchItems])
 
-  const openCreate = () => {
+  const openCreate = async () => {
     setEditItem(null)
     const defaults: Record<string, unknown> = {}
     fields.forEach((f) => {
@@ -63,6 +70,14 @@ export default function CrudTable<T extends object>({
     })
     setForm(defaults)
     setShowModal(true)
+    if (onOpenCreate) {
+      try {
+        const extra = await onOpenCreate()
+        setForm((prev) => ({ ...prev, ...extra }))
+      } catch {
+        // Si falla la precarga (p. ej. el preview del número), el formulario sigue usable.
+      }
+    }
   }
 
   const openEdit = (item: T) => {
@@ -266,6 +281,15 @@ export default function CrudTable<T extends object>({
                 <CuentaPicker
                   value={(form[field.key] as number | null) ?? null}
                   onChange={(id) => handleChange(field.key, id)} />
+              ) : field.type === 'money' ? (
+                <MoneyInput
+                  className={lockedInputClass}
+                  value={(form[field.key] as number | '' | null) ?? ''}
+                  onChange={(v) => handleChange(field.key, v)}
+                  required={field.required}
+                  readOnly={locked}
+                  disabled={locked}
+                />
               ) : (
                 <input
                   type={field.type}

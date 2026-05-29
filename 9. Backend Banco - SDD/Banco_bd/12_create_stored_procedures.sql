@@ -357,6 +357,8 @@ BEGIN
   DECLARE v_estado_activa_id BIGINT UNSIGNED;
   DECLARE v_numero_cuenta VARCHAR(24);
   DECLARE v_cuenta_id BIGINT UNSIGNED;
+  DECLARE v_anio CHAR(4);
+  DECLARE v_ultimo BIGINT UNSIGNED;
 
   SELECT id INTO v_tipo_cuenta_id FROM cat_tipo_cuenta WHERE codigo = p_tipo_cuenta_codigo AND activo = 1 LIMIT 1;
   SELECT id INTO v_moneda_id FROM cat_moneda WHERE codigo = p_moneda_codigo AND activo = 1 LIMIT 1;
@@ -366,9 +368,22 @@ BEGIN
     SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Tipo de cuenta o moneda invalido';
   END IF;
 
-  SET v_numero_cuenta = CONCAT('10', DATE_FORMAT(UTC_TIMESTAMP(), '%y%m%d%H%i%s'), LPAD(FLOOR(RAND()*100), 2, '0'));
+  -- Numero de cuenta consecutivo por anio: AAAA + 7 digitos (11 caracteres).
+  -- El primero del anio es AAAA0000000 (p.ej. 20260000000) y a partir de alli incrementa de uno en uno.
+  SET v_anio = DATE_FORMAT(UTC_TIMESTAMP(), '%Y');
 
   START TRANSACTION;
+
+  SELECT MAX(CAST(numero_cuenta AS UNSIGNED)) INTO v_ultimo
+  FROM cta_cuenta
+  WHERE CHAR_LENGTH(numero_cuenta) = 11
+    AND numero_cuenta LIKE CONCAT(v_anio, '%');
+
+  IF v_ultimo IS NULL THEN
+    SET v_numero_cuenta = CONCAT(v_anio, '0000000');
+  ELSE
+    SET v_numero_cuenta = CAST(v_ultimo + 1 AS CHAR);
+  END IF;
 
   IF p_titular_tipo = 'PERSONA' THEN
     INSERT INTO cta_cuenta(numero_cuenta, tipo_cuenta_id, titular_tipo, titular_persona_id, saldo_actual, limite_sobregiro_autorizado, moneda_id, estado_id, created_by, updated_by)

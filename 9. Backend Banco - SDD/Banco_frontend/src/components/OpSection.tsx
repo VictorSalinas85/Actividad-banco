@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react'
 import toast from 'react-hot-toast'
 import type { Field, SpResultado, ApiResponse } from '../types'
 import { useAuth } from '../auth/AuthContext'
-import { EntityPicker, CuentaPicker, invalidateCuentaCache } from './common'
+import { EntityPicker, CuentaPicker, MoneyInput, invalidateCuentaCache } from './common'
 import { invalidateDirectorioCache } from './common/directorio'
 
 interface Props {
@@ -166,6 +166,13 @@ export default function OpSection({
                 <CuentaPicker
                   value={(form[field.key] as number | null) ?? null}
                   onChange={(id) => handleChange(field.key, id)}
+                />
+
+              ) : field.type === 'money' ? (
+                <MoneyInput
+                  value={(form[field.key] as number | '' | null) ?? ''}
+                  onChange={(v) => handleChange(field.key, v)}
+                  required={field.required}
                 />
 
               ) : (

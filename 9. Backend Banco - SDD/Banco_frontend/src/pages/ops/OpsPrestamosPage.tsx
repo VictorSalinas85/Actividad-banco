@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Banknote } from 'lucide-react'
 import toast from 'react-hot-toast'
 import {
-  PageHeader, IdentificacionLookup, CuentaPicker,
+  PageHeader, IdentificacionLookup, CuentaPicker, MoneyInput,
   invalidateDirectorioCache, invalidateCuentaCache,
 } from '../../components/common'
 import OpSection from '../../components/OpSection'
@@ -21,7 +21,7 @@ export default function OpsPrestamosPage() {
   // forma natural de identificar un prestamo una vez creado).
   const aprobar: Field[] = [
     { key: 'prestamoId',   label: 'ID préstamo', type: 'number', required: true },
-    { key: 'montoAprobado', label: 'Monto aprobado', type: 'number', required: true },
+    { key: 'montoAprobado', label: 'Monto aprobado', type: 'money', required: true },
     { key: 'tasaInteres',  label: 'Tasa interés (%)', type: 'number', required: true },
   ]
   const rechazar: Field[] = [
@@ -120,9 +120,7 @@ function SolicitarPrestamoForm({ tipos }: { tipos: Cat[] }) {
           </div>
           <div>
             <label className="label">Monto solicitado <span className="text-red-500">*</span></label>
-            <input type="number" className="input" value={montoSolicitado}
-              onChange={(e) => setMontoSolicitado(e.target.value ? Number(e.target.value) : '')}
-              min={0.01} step={0.01} required />
+            <MoneyInput value={montoSolicitado} onChange={setMontoSolicitado} required />
           </div>
           <div>
             <label className="label">Plazo (meses) <span className="text-red-500">*</span></label>

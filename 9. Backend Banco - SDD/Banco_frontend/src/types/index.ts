@@ -319,7 +319,7 @@ export interface Column<T> {
 }
 
 export type FieldType =
-  | 'text' | 'number' | 'email' | 'date' | 'select' | 'textarea' | 'checkbox'
+  | 'text' | 'number' | 'money' | 'email' | 'date' | 'select' | 'textarea' | 'checkbox'
   | 'person-picker' | 'empresa-picker' | 'usuario-picker' | 'cuenta-picker'
 
 export interface Field {

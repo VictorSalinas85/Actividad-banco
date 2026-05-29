@@ -42,7 +42,7 @@ export default function TransferenciasPage() {
     { key: 'cuentaDestinoId', label: 'ID cuenta destino', type: 'number', required: true },
     { key: 'tipoTransferenciaId', label: 'Tipo', type: 'select', required: true,
       options: tipos.data.map((t) => ({ value: t.id, label: `${t.codigo} — ${t.nombre}` })) },
-    { key: 'monto',    label: 'Monto', type: 'number', required: true },
+    { key: 'monto',    label: 'Monto', type: 'money', required: true },
     { key: 'monedaId', label: 'Moneda', type: 'select', required: true,
       options: monedas.data.map((m) => ({ value: m.id, label: `${m.codigo} — ${m.nombre}` })) },
     { key: 'usuarioSolicitanteId', label: 'Usuario solicitante', type: 'usuario-picker', required: true },

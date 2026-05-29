@@ -14,7 +14,7 @@ export default function OpsTransferenciasPage() {
     { key: 'cuentaDestinoId', label: 'Cuenta destino', type: 'cuenta-picker', required: true },
     { key: 'empresaId',       label: 'Empresa (si aplica)', type: 'empresa-picker',
       help: 'Solo si la transferencia es a nombre de una empresa cliente' },
-    { key: 'monto',           label: 'Monto', type: 'number', required: true },
+    { key: 'monto',           label: 'Monto', type: 'money', required: true },
     { key: 'canalCodigo',     label: 'Canal', type: 'select', required: true,
       options: canales.data.map((c) => ({ value: c.codigo ?? '', label: `${c.codigo ?? ''} — ${c.nombre ?? ''}` })) },
     { key: 'idempotencyKey',  label: 'Clave de idempotencia (opcional)', type: 'text' },
@@ -34,7 +34,7 @@ export default function OpsTransferenciasPage() {
   const directa: Field[] = [
     { key: 'cuentaOrigenId',  label: 'Cuenta origen',  type: 'cuenta-picker', required: true },
     { key: 'cuentaDestinoId', label: 'Cuenta destino', type: 'cuenta-picker', required: true },
-    { key: 'monto',           label: 'Monto', type: 'number', required: true },
+    { key: 'monto',           label: 'Monto', type: 'money', required: true },
     { key: 'canalCodigo',     label: 'Canal', type: 'select', required: true,
       options: canales.data.map((c) => ({ value: c.codigo ?? '', label: `${c.codigo ?? ''} — ${c.nombre ?? ''}` })) },
     { key: 'idempotencyKey',  label: 'Clave de idempotencia (opcional)', type: 'text' },

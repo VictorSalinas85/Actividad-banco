@@ -38,7 +38,7 @@ export default function PrestamosPage() {
     { key: 'clienteEmpresaId', label: 'Cliente empresa (opcional)', type: 'empresa-picker' },
     { key: 'tipoCreditoId', label: 'Tipo de crédito', type: 'select', required: true,
       options: tipos.data.map((t) => ({ value: t.id, label: `${t.codigo} — ${t.nombre}` })) },
-    { key: 'montoSolicitado', label: 'Monto solicitado', type: 'number', required: true },
+    { key: 'montoSolicitado', label: 'Monto solicitado', type: 'money', required: true },
     { key: 'tasaInteres',     label: 'Tasa interés (%)', type: 'number', required: true },
     { key: 'plazoMeses',      label: 'Plazo (meses)',    type: 'number', required: true },
     { key: 'proposito',       label: 'Propósito',         type: 'textarea' },

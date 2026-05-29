@@ -31,6 +31,11 @@ public class CuentaController {
         return ResponseEntity.ok(ApiResponse.ok(cuentaService.buscarTodos()));
     }
 
+    @GetMapping("/proximo-numero")
+    public ResponseEntity<ApiResponse<String>> proximoNumero() {
+        return ResponseEntity.ok(ApiResponse.ok(cuentaService.proximoNumeroCuenta()));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<CtaCuentaResponse>> obtener(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.ok(cuentaService.buscarPorId(id)));
