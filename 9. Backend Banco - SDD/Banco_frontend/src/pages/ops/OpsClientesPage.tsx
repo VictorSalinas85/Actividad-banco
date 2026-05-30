@@ -12,9 +12,15 @@ import { useTiposIdent, useEstadosUsuario, useRolesEmpresa } from '../../lib/use
 import type { Field, SpResultado } from '../../types'
 
 export default function OpsClientesPage() {
+  const { hasRole } = useAuth()
   const tiposIdent = useTiposIdent()
   const estados    = useEstadosUsuario()
   const rolesEmp   = useRolesEmpresa()
+  const puedeCrearPersona  = hasRole('ANALISTA_INTERNO', 'EMPLEADO_VENTANILLA', 'EMPLEADO_COMERCIAL')
+  const puedeCrearEmpresa  = hasRole('ANALISTA_INTERNO', 'EMPLEADO_COMERCIAL')
+  const puedeCambiarEstado = hasRole('ANALISTA_INTERNO', 'EMPLEADO_VENTANILLA', 'EMPLEADO_COMERCIAL')
+  const puedeAsociar       = hasRole('ANALISTA_INTERNO', 'EMPLEADO_COMERCIAL')
+  const puedeAsignarRol    = hasRole('ANALISTA_INTERNO', 'CLIENTE_EMPRESA_ADMIN')
 
   // ── Crear persona / Crear empresa (siguen siendo OpSection genericos) ──
   const crearPersona: Field[] = [
@@ -53,19 +59,19 @@ export default function OpsClientesPage() {
         icon={<Users className="h-5 w-5" />}
       />
 
-      <OpSection title="Crear persona natural"  fields={crearPersona}
+      {puedeCrearPersona && <OpSection title="Crear persona natural"  fields={crearPersona}
         description="Crea el registro completo de una persona natural en la base de datos."
-        onSubmit={opsApi.crearPersona} />
+        onSubmit={opsApi.crearPersona} />}
 
-      <OpSection title="Crear empresa"          fields={crearEmpresa}
+      {puedeCrearEmpresa && <OpSection title="Crear empresa"          fields={crearEmpresa}
         description="Crea una empresa cliente. Requiere que el representante legal ya exista como persona natural."
-        onSubmit={opsApi.crearEmpresa} />
+        onSubmit={opsApi.crearEmpresa} />}
 
-      <CambiarEstadoClienteForm estados={estados.data} />
+      {puedeCambiarEstado && <CambiarEstadoClienteForm estados={estados.data} />}
 
-      <AsociarUsuarioEmpresaForm />
+      {puedeAsociar && <AsociarUsuarioEmpresaForm />}
 
-      <AsignarRolEmpresaForm rolesEmp={rolesEmp.data} />
+      {puedeAsignarRol && <AsignarRolEmpresaForm rolesEmp={rolesEmp.data} />}
     </div>
   )
 }

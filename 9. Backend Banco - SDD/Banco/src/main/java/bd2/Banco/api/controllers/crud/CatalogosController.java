@@ -19,7 +19,10 @@ import java.util.List;
 @RequestMapping("/api/v1/catalogos")
 @RequiredArgsConstructor
 @Tag(name = "Catálogos", description = "CRUD de tablas maestras del sistema")
-@PreAuthorize("hasAuthority('ANALISTA_INTERNO')")
+// Lectura: cualquier usuario autenticado (los catálogos alimentan los dropdowns
+// de todos los formularios). La escritura (POST/PUT/DELETE) queda restringida a
+// ANALISTA_INTERNO mediante reglas por URL en SecurityConfig.
+@PreAuthorize("isAuthenticated()")
 public class CatalogosController {
 
     private final CatTipoIdentificacionCrudService tipoIdentificacionService;

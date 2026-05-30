@@ -21,12 +21,18 @@ import type { Field, SpResultado } from '../../types'
 interface Cat { id: number; codigo?: string; nombre?: string }
 
 export default function OpsCuentasPage() {
+  const { hasRole } = useAuth()
   const tipos    = useTiposCuenta()
   const monedas  = useMonedas()
   const motivos  = useMotivosBloqueo()
   const canales  = useCanalesOp()
 
-  // ── Abrir cuenta — identificacion del titular + tipo cuenta + moneda ──
+  // Cada operación se muestra solo a los roles autorizados en el backend,
+  // de modo que el usuario únicamente ve lo que realmente puede ejecutar.
+  const puedeAbrir       = hasRole('ANALISTA_INTERNO', 'EMPLEADO_VENTANILLA', 'EMPLEADO_COMERCIAL')
+  const puedeMover       = hasRole('ANALISTA_INTERNO', 'EMPLEADO_VENTANILLA', 'CLIENTE_PERSONA', 'CLIENTE_EMPRESA_ADMIN', 'EMPLEADO_EMPRESA_OPERATIVO')
+  const puedeBloquear    = hasRole('ANALISTA_INTERNO', 'EMPLEADO_VENTANILLA')
+
   return (
     <div>
       <PageHeader
@@ -35,13 +41,13 @@ export default function OpsCuentasPage() {
         icon={<CreditCard className="h-5 w-5" />}
       />
 
-      <AbrirCuentaForm tipos={tipos.data} monedas={monedas.data} />
+      {puedeAbrir && <AbrirCuentaForm tipos={tipos.data} monedas={monedas.data} />}
 
-      <ConsignarForm canales={canales.data} />
-      <RetirarForm   canales={canales.data} />
+      {puedeMover && <ConsignarForm canales={canales.data} />}
+      {puedeMover && <RetirarForm   canales={canales.data} />}
 
-      <BloquearCuentaForm motivos={motivos.data} />
-      <CancelarCuentaForm />
+      {puedeBloquear && <BloquearCuentaForm motivos={motivos.data} />}
+      {puedeBloquear && <CancelarCuentaForm />}
     </div>
   )
 }

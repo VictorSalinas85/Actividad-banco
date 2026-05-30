@@ -74,22 +74,22 @@ export default function App() {
 
           {/* Clientes */}
           <Route path="personas" element={<RequireAuth roles={[ANALISTA, VENTANILLA, COMERCIAL]}><PersonasPage /></RequireAuth>} />
-          <Route path="empresas" element={<RequireAuth roles={[ANALISTA, COMERCIAL, EMP_ADMIN]}><EmpresasPage /></RequireAuth>} />
+          <Route path="empresas" element={<RequireAuth roles={[ANALISTA, COMERCIAL]}><EmpresasPage /></RequireAuth>} />
           <Route path="empresa-usuarios" element={<RequireAuth roles={[ANALISTA, COMERCIAL]}><EmpresaUsuariosPage /></RequireAuth>} />
 
           {/* Banca */}
-          <Route path="cuentas"        element={<RequireAuth roles={[ANALISTA, VENTANILLA, COMERCIAL, EMP_SUP, EMP_ADMIN, EMP_OP, CLIENTE]}><CuentasPage /></RequireAuth>} />
+          <Route path="cuentas"        element={<RequireAuth roles={[ANALISTA, VENTANILLA, COMERCIAL, EMP_SUP]}><CuentasPage /></RequireAuth>} />
           <Route path="movimientos"    element={<RequireAuth roles={[ANALISTA, VENTANILLA]}><MovimientosPage /></RequireAuth>} />
           <Route path="prestamos"      element={<RequireAuth roles={[ANALISTA, COMERCIAL]}><PrestamosPage /></RequireAuth>} />
           <Route path="prestamos/aprobaciones" element={<RequireAuth roles={[ANALISTA, COMERCIAL]}><PrestamoAprobacionesPage /></RequireAuth>} />
           <Route path="prestamos/desembolsos"  element={<RequireAuth roles={[ANALISTA, COMERCIAL]}><PrestamoDesembolsosPage /></RequireAuth>} />
-          <Route path="transferencias" element={<RequireAuth roles={[ANALISTA, VENTANILLA, EMP_SUP, EMP_OP, EMP_ADMIN]}><TransferenciasPage /></RequireAuth>} />
+          <Route path="transferencias" element={<RequireAuth roles={[ANALISTA, VENTANILLA, EMP_SUP, EMP_OP]}><TransferenciasPage /></RequireAuth>} />
           <Route path="transferencias/aprobaciones" element={<RequireAuth roles={[ANALISTA, EMP_SUP]}><TransferenciaAprobacionesPage /></RequireAuth>} />
           <Route path="productos"      element={<RequireAuth roles={ALL}><ProductosPage /></RequireAuth>} />
 
           {/* Operaciones (SPs) */}
           <Route path="ops/clientes"       element={<RequireAuth roles={[ANALISTA, VENTANILLA, COMERCIAL, EMP_ADMIN]}><OpsClientesPage /></RequireAuth>} />
-          <Route path="ops/cuentas"        element={<RequireAuth roles={[ANALISTA, VENTANILLA, CLIENTE, EMP_ADMIN, EMP_OP]}><OpsCuentasPage /></RequireAuth>} />
+          <Route path="ops/cuentas"        element={<RequireAuth roles={[ANALISTA, VENTANILLA, COMERCIAL, CLIENTE, EMP_ADMIN, EMP_OP]}><OpsCuentasPage /></RequireAuth>} />
           <Route path="ops/prestamos"      element={<RequireAuth roles={[ANALISTA, COMERCIAL, VENTANILLA, CLIENTE, EMP_ADMIN]}><OpsPrestamosPage /></RequireAuth>} />
           <Route path="ops/transferencias" element={<RequireAuth roles={[ANALISTA, VENTANILLA, CLIENTE, EMP_SUP, EMP_ADMIN, EMP_OP]}><OpsTransferenciasPage /></RequireAuth>} />
           <Route path="ops/sesiones"       element={<RequireAuth roles={[ANALISTA, VENTANILLA, COMERCIAL]}><OpsSesionesPage /></RequireAuth>} />

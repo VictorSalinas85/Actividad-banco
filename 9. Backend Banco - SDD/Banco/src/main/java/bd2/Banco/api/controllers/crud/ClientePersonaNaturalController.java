@@ -18,7 +18,9 @@ import java.util.List;
 @RequestMapping("/api/v1/personas")
 @RequiredArgsConstructor
 @Tag(name = "Personas Naturales", description = "CRUD de clientes persona natural")
-@PreAuthorize("hasAnyAuthority('ANALISTA_INTERNO','EMPLEADO_VENTANILLA','EMPLEADO_COMERCIAL')")
+// Lectura: cualquier usuario autenticado (los formularios y lookups la necesitan).
+// Escritura: restringida por método.
+@PreAuthorize("isAuthenticated()")
 public class ClientePersonaNaturalController {
 
     private final CliPersonaNaturalCrudService personaService;

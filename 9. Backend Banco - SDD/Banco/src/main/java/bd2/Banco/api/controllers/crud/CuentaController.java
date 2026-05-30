@@ -18,7 +18,9 @@ import java.util.List;
 @RequestMapping("/api/v1/cuentas")
 @RequiredArgsConstructor
 @Tag(name = "Cuentas", description = "CRUD de cuentas bancarias y movimientos")
-@PreAuthorize("hasAnyAuthority('ANALISTA_INTERNO','EMPLEADO_VENTANILLA','EMPLEADO_COMERCIAL','SUPERVISOR_EMPRESA')")
+// Lectura: cualquier usuario autenticado (los lookups de cuenta la necesitan).
+// Escritura: restringida por método.
+@PreAuthorize("isAuthenticated()")
 public class CuentaController {
 
     private final CtaCuentaCrudService cuentaService;

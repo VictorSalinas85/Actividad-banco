@@ -18,7 +18,9 @@ import java.util.List;
 @RequestMapping("/api/v1/empresas")
 @RequiredArgsConstructor
 @Tag(name = "Empresas", description = "CRUD de clientes empresa, usuarios de empresa y sus roles")
-@PreAuthorize("hasAnyAuthority('ANALISTA_INTERNO','EMPLEADO_COMERCIAL')")
+// Lectura: cualquier usuario autenticado (los formularios y lookups la necesitan).
+// Escritura: restringida por método.
+@PreAuthorize("isAuthenticated()")
 public class ClienteEmpresaController {
 
     private final CliEmpresaCrudService empresaService;
@@ -38,6 +40,7 @@ public class ClienteEmpresaController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyAuthority('ANALISTA_INTERNO','EMPLEADO_COMERCIAL')")
     public ResponseEntity<ApiResponse<CliEmpresaResponse>> crear(
             @Valid @RequestBody CliEmpresaCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -45,6 +48,7 @@ public class ClienteEmpresaController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ANALISTA_INTERNO','EMPLEADO_COMERCIAL')")
     public ResponseEntity<ApiResponse<CliEmpresaResponse>> actualizar(
             @PathVariable Long id, @Valid @RequestBody CliEmpresaUpdateRequest request) {
         return ResponseEntity.ok(ApiResponse.ok(empresaService.actualizar(id, request)));
@@ -70,6 +74,7 @@ public class ClienteEmpresaController {
     }
 
     @PostMapping("/usuarios")
+    @PreAuthorize("hasAnyAuthority('ANALISTA_INTERNO','EMPLEADO_COMERCIAL')")
     public ResponseEntity<ApiResponse<CliEmpresaUsuarioResponse>> crearUsuario(
             @Valid @RequestBody CliEmpresaUsuarioCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -77,6 +82,7 @@ public class ClienteEmpresaController {
     }
 
     @PutMapping("/usuarios/{id}")
+    @PreAuthorize("hasAnyAuthority('ANALISTA_INTERNO','EMPLEADO_COMERCIAL')")
     public ResponseEntity<ApiResponse<CliEmpresaUsuarioResponse>> actualizarUsuario(
             @PathVariable Long id, @Valid @RequestBody CliEmpresaUsuarioUpdateRequest request) {
         return ResponseEntity.ok(ApiResponse.ok(empresaUsuarioService.actualizar(id, request)));
@@ -102,6 +108,7 @@ public class ClienteEmpresaController {
     }
 
     @PostMapping("/usuarios/roles")
+    @PreAuthorize("hasAnyAuthority('ANALISTA_INTERNO','EMPLEADO_COMERCIAL','CLIENTE_EMPRESA_ADMIN')")
     public ResponseEntity<ApiResponse<CliEmpresaUsuarioRolResponse>> asignarRol(
             @Valid @RequestBody CliEmpresaUsuarioRolCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)

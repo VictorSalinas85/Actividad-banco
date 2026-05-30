@@ -8,6 +8,7 @@ import { useEstadosTrans, useTiposTrans, useMonedas } from '../../lib/useEntityL
 
 export default function TransferenciasPage() {
   const { hasRole } = useAuth()
+  const canEdit = hasRole(ROLES.ADMIN, ROLES.SUPERVISOR_EMPRESA)
   const canDelete = hasRole(ROLES.ADMIN)
   const tipos    = useTiposTrans()
   const monedas  = useMonedas()
@@ -63,6 +64,7 @@ export default function TransferenciasPage() {
         apiPath="/transferencias"
         columns={columns}
         fields={fields}
+        canEdit={canEdit}
         canDelete={canDelete}
       />
     </div>

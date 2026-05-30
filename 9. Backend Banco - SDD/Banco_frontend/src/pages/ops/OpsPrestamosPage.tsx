@@ -14,8 +14,12 @@ import type { Field, SpResultado } from '../../types'
 interface Cat { id: number; codigo?: string; nombre?: string }
 
 export default function OpsPrestamosPage() {
+  const { hasRole } = useAuth()
   const tipos    = useTiposPrest()
   const motivos  = useMotivosRechazo()
+  const puedeSolicitar  = hasRole('ANALISTA_INTERNO', 'EMPLEADO_COMERCIAL', 'CLIENTE_PERSONA', 'CLIENTE_EMPRESA_ADMIN')
+  const puedeDecidir    = hasRole('ANALISTA_INTERNO', 'EMPLEADO_COMERCIAL')
+  const puedeDesembolsar = hasRole('ANALISTA_INTERNO', 'EMPLEADO_VENTANILLA', 'EMPLEADO_COMERCIAL')
 
   // Aprobar / Rechazar / Desembolsar — todavia usan prestamoId (es la
   // forma natural de identificar un prestamo una vez creado).
@@ -42,14 +46,14 @@ export default function OpsPrestamosPage() {
         icon={<Banknote className="h-5 w-5" />}
       />
 
-      <SolicitarPrestamoForm tipos={tipos.data} />
+      {puedeSolicitar && <SolicitarPrestamoForm tipos={tipos.data} />}
 
-      <OpSection title="Aprobar préstamo"   fields={aprobar}
-        description="Aprueba la solicitud con monto y tasa definitivos." onSubmit={opsApi.aprobarPrestamo} />
-      <OpSection title="Rechazar préstamo"  fields={rechazar}
-        description="Rechaza la solicitud indicando el motivo." onSubmit={opsApi.rechazarPrestamo} />
-      <OpSection title="Desembolsar"        fields={desembolsar}
-        description="Ejecuta el desembolso del préstamo a la cuenta destino registrada." onSubmit={opsApi.desembolsarPrestamo} />
+      {puedeDecidir && <OpSection title="Aprobar préstamo"   fields={aprobar}
+        description="Aprueba la solicitud con monto y tasa definitivos." onSubmit={opsApi.aprobarPrestamo} />}
+      {puedeDecidir && <OpSection title="Rechazar préstamo"  fields={rechazar}
+        description="Rechaza la solicitud indicando el motivo." onSubmit={opsApi.rechazarPrestamo} />}
+      {puedeDesembolsar && <OpSection title="Desembolsar"        fields={desembolsar}
+        description="Ejecuta el desembolso del préstamo a la cuenta destino registrada." onSubmit={opsApi.desembolsarPrestamo} />}
     </div>
   )
 }

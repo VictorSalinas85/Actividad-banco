@@ -44,7 +44,7 @@ const NAV: NavGroup[] = [
       {
         label: 'Empresas',
         path: '/empresas',
-        roles: ['ANALISTA_INTERNO', 'EMPLEADO_COMERCIAL', 'CLIENTE_EMPRESA_ADMIN'],
+        roles: ['ANALISTA_INTERNO', 'EMPLEADO_COMERCIAL'],
         icon: '🏢',
       },
       {
@@ -102,7 +102,7 @@ const NAV: NavGroup[] = [
       {
         label: 'Ops. Cuentas',
         path: '/ops/cuentas',
-        roles: ['ANALISTA_INTERNO', 'EMPLEADO_VENTANILLA', 'CLIENTE_PERSONA', 'CLIENTE_EMPRESA_ADMIN', 'EMPLEADO_EMPRESA_OPERATIVO'],
+        roles: ['ANALISTA_INTERNO', 'EMPLEADO_VENTANILLA', 'EMPLEADO_COMERCIAL', 'CLIENTE_PERSONA', 'CLIENTE_EMPRESA_ADMIN', 'EMPLEADO_EMPRESA_OPERATIVO'],
         icon: '⚙️',
       },
       {

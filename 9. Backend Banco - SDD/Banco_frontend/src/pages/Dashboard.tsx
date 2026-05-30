@@ -30,21 +30,21 @@ const ROLE_SHORTCUTS: Record<string, { label: string; path: string; icon: string
     { label: 'Ops. Préstamos', path: '/ops/prestamos', icon: '⚙️' },
   ],
   CLIENTE_PERSONA: [
-    { label: 'Mis cuentas', path: '/cuentas', icon: '💳' },
+    { label: 'Consignar / Retirar', path: '/ops/cuentas', icon: '💳' },
     { label: 'Transferencias', path: '/ops/transferencias', icon: '↔️' },
-    { label: 'Préstamos', path: '/ops/prestamos', icon: '💰' },
+    { label: 'Solicitar préstamo', path: '/ops/prestamos', icon: '💰' },
     { label: 'Productos', path: '/productos', icon: '🏦' },
   ],
   CLIENTE_EMPRESA_ADMIN: [
-    { label: 'Mi empresa', path: '/empresas', icon: '🏢' },
-    { label: 'Usuarios empresa', path: '/empresa-usuarios', icon: '👥' },
-    { label: 'Cuentas', path: '/cuentas', icon: '💳' },
+    { label: 'Ops. Clientes', path: '/ops/clientes', icon: '👥' },
+    { label: 'Ops. Cuentas', path: '/ops/cuentas', icon: '💳' },
     { label: 'Transferencias', path: '/ops/transferencias', icon: '↔️' },
+    { label: 'Productos', path: '/productos', icon: '🏦' },
   ],
   EMPLEADO_EMPRESA_OPERATIVO: [
-    { label: 'Cuentas', path: '/cuentas', icon: '💳' },
     { label: 'Ops. Cuentas', path: '/ops/cuentas', icon: '⚙️' },
     { label: 'Ops. Transferencias', path: '/ops/transferencias', icon: '↔️' },
+    { label: 'Productos', path: '/productos', icon: '🏦' },
   ],
   SUPERVISOR_EMPRESA: [
     { label: 'Transferencias', path: '/transferencias', icon: '↔️' },

@@ -31,6 +31,7 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
     @Value("${cors.allowed-origins:http://localhost:3000}")
     private String allowedOrigins;
@@ -42,14 +43,19 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(session ->
                     session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .exceptionHandling(ex ->
-                    ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+            .exceptionHandling(ex -> ex
+                    .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                    .accessDeniedHandler(jwtAccessDeniedHandler))
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/api/v1/auth/**").permitAll()
                     .requestMatchers("/swagger-ui/**", "/v3/api-docs/**",
                                      "/swagger-ui.html", "/swagger-ui/index.html").permitAll()
                     .requestMatchers("/actuator/health").permitAll()
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                    // Catálogos: lectura para autenticados; escritura solo ANALISTA_INTERNO.
+                    .requestMatchers(HttpMethod.POST, "/api/v1/catalogos/**").hasAuthority("ANALISTA_INTERNO")
+                    .requestMatchers(HttpMethod.PUT, "/api/v1/catalogos/**").hasAuthority("ANALISTA_INTERNO")
+                    .requestMatchers(HttpMethod.DELETE, "/api/v1/catalogos/**").hasAuthority("ANALISTA_INTERNO")
                     .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

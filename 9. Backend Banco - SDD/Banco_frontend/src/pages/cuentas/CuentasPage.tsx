@@ -9,6 +9,7 @@ import { cuentasApi } from '../../api/resources'
 
 export default function CuentasPage() {
   const { hasRole } = useAuth()
+  const canWrite = hasRole(ROLES.ANALISTA, ROLES.VENTANILLA)
   const canDelete = hasRole(ROLES.ADMIN)
   const tipos    = useTiposCuenta()
   const monedas  = useMonedas()
@@ -68,6 +69,8 @@ export default function CuentasPage() {
         apiPath="/cuentas"
         columns={columns}
         fields={fields}
+        canCreate={canWrite}
+        canEdit={canWrite}
         canDelete={canDelete}
         onOpenCreate={async () => {
           const res = await cuentasApi.proximoNumero()
