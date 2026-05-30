@@ -166,12 +166,15 @@ export interface CtaMovimiento {
   id: number
   cuentaId: number
   tipoMovimientoId: number
+  tipoOperacionId?: number
+  canalId?: number
   monto: number
-  saldoAnterior: number
-  saldoNuevo: number
-  descripcion?: string
+  saldoAntes: number
+  saldoDespues: number
   referenciaExterna?: string
-  creadoEn?: string
+  idempotencyKey?: string
+  fechaMovimiento?: string
+  createdAt?: string
 }
 
 // ─── Préstamos ─────────────────────────────────────────────────────────────

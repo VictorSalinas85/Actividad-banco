@@ -17,10 +17,10 @@ export default function MovimientosPage() {
         return <code className="text-xs bg-ink-100 px-1.5 py-0.5 rounded">{t?.codigo ?? `#${v}`}</code>
       } },
     { key: 'monto', header: 'Monto', render: (v) => <MoneyValue value={Number(v)} /> },
-    { key: 'saldoAnterior', header: 'Saldo anterior', render: (v) => <MoneyValue value={Number(v)} /> },
-    { key: 'saldoNuevo', header: 'Saldo nuevo', render: (v) => <MoneyValue value={Number(v)} /> },
-    { key: 'descripcion', header: 'Descripción' },
-    { key: 'creadoEn', header: 'Fecha', render: (v) => <span className="text-xs">{formatDateTime(v as string)}</span> },
+    { key: 'saldoAntes', header: 'Saldo anterior', render: (v) => <MoneyValue value={Number(v)} /> },
+    { key: 'saldoDespues', header: 'Saldo nuevo', render: (v) => <MoneyValue value={Number(v)} /> },
+    { key: 'referenciaExterna', header: 'Descripción', render: (v) => <span className="text-xs">{(v as string) ?? '—'}</span> },
+    { key: 'fechaMovimiento', header: 'Fecha', render: (v) => <span className="text-xs">{formatDateTime(v as string)}</span> },
   ]
 
   return (
